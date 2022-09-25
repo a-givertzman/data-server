@@ -29,7 +29,7 @@ impl Config {
     ///
     fn build(&mut self) {
         let config = self._readFromFile(&self._path);
-        self._lines = 
+        self._lines = serde_json::from_str(&config).unwrap();
         // for (lineKey, line) in config {
         //     print!("\n\t{}:\t{:?}", &lineKey, line);
         //     self._lines.entry(lineKey).or_insert(Line::new(line));
@@ -43,23 +43,9 @@ impl Config {
 #[derive(Debug, Deserialize)]
 pub struct Line {
     // #[serde(flatten)]
-    _iedsConfig: HashMap<String, HashMap<String, serde_json::Value>>,
     _ieds: HashMap<String, Ied>,
 }
 impl Line {
-    fn new(iedsConfigs: HashMap<String, HashMap<String, serde_json::Value>>) -> Self {
-        Self{_iedsConfig: iedsConfigs, _ieds: HashMap::from([])}
-    }
-    ///
-    fn build(&mut self) {
-        for (iedKey, ied) in &self._iedsConfig {
-            print!("\n\t{}:\t{:?}", &iedKey, ied);
-            self._ieds.entry(iedKey.to_string()).or_insert(ied);
-            // for (iedKey, ied) in line.ieds {
-            //     print!("\n\t\t{}:\t{:?}", iedKey, ied);
-            // }
-        }    
-    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
