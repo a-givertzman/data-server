@@ -1,18 +1,90 @@
 {
     "line1": {
-        "ied1.1": {
-
-        },
-        "ied1.2": {
-
+        "name": "Line 1",
+        "ieds": {
+            "ied1.1": {
+                "name": "Ied 1.1",
+                "description": "S7-IED-01.01",
+                "ip": "192.168.120.241",
+                "rack": 0,
+                "slot": 1,
+                "dbs": {
+                    "db1": {
+                        "name": "DB1",
+                        "description": "db899",
+                        "number": 899,
+                        "offset": 0,
+                        "size": 34,
+                        "delay": 10,
+                        "points": {
+                            "point1.1.1": {
+                                "dataType": "Int",
+                                "comment": "Point 1.1.1",
+                                "offset": 0,
+                                "vrt": 1
+                            },
+                            "point1.1.2": {
+                                "dataType": "Int",
+                                "comment": "Point 1.1.2",
+                                "offset": 2,
+                                "vrt": 1
+                            }
+                        }
+                    }
+                }
+            },
+            "ied1.2": {
+                "description": "S7-IED-01.01",
+                "ip": "192.168.120.241",
+                "rack": 0,
+                "slot": 1,
+                "dbs": {
+                    "db1": {
+                        "name": "DB1",
+                        "points": {
+                            "point1.2.1": {},
+                            "point1.2.2": {}
+                        }    
+                    }
+                }
+            }
         }
     },
     "line2": {
-        "ied2.1": {
-
-        },
-        "ied2.2": {
-
+        "name": "Line 2",
+        "ieds": {
+            "ied2.1": {
+                "name": "Ied 2.1",
+                "description": "S7-IED-01.01",
+                "ip": "192.168.120.241",
+                "rack": 0,
+                "slot": 1,
+                "dbs": {
+                    "db1": {
+                        "name": "DB1",
+                        "points": {
+                            "point2.1.1": {},
+                            "point2.1.2": {}            
+                        }
+                    }
+                }
+            },
+            "ied2.2": {
+                "name": "Ied 2.2",
+                "description": "S7-IED-01.01",
+                "ip": "192.168.120.241",
+                "rack": 0,
+                "slot": 1,
+                "dbs": {
+                    "db1": {
+                        "name": "DB1",
+                        "points": {
+                            "point2.2.1": {},
+                            "point2.2.2": {}
+                        }
+                    }
+                }
+            }
         }
     }
 }
