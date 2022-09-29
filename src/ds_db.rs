@@ -3,7 +3,7 @@
 pub mod ds_db {
     use std::collections::HashMap;
 
-    use crate::{ds_config::ds_config::{DsPointConf, DsDbConf}, ds_point::ds_point::DsPoint};
+    use crate::{ds_config::ds_config::{DsDbConf}, ds_point::ds_point::DsPoint};
 
     #[derive(Debug)]
     pub struct DsDb {
@@ -28,14 +28,11 @@ pub mod ds_db {
                         // println!("\t\t\tdb {:?}: {:?}", &pointKey, pointConf);
                         localPoints.insert(
                             pointKey.clone(),
-                            DsPoint { 
-                                name: pointKey, 
-                                path: path.clone(), 
-                                dataType: pointConf.dataType, 
-                                offset: pointConf.offset, 
-                                comment: pointConf.comment, 
-                                vrt: pointConf.vrt, 
-                            },
+                            DsPoint::new(
+                                pointKey, 
+                                path.clone(), 
+                                pointConf
+                            ),
                         );
                     }
                 }

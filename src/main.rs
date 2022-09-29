@@ -1,7 +1,5 @@
 #![allow(non_snake_case)]
 use std;
-use std::fs;
-use std::collections::HashMap;
 use std::env;
 mod ds_config;
 mod ds_db;
@@ -46,14 +44,14 @@ fn main() {
     }
     // println!("config {:?}", config);
     // config.build();
-    let mut client = Client::new();
+    let mut client = Client::new(String::from("192.168.120.241"));
 
     client.connect();
 
     println!("{:#?}", client);
 
     loop {
-        println!("{:#?}", client.read(1420, 0, 20));
+        println!("{:#?}", client.read(899, 0, 34));
         std::thread::sleep(std::time::Duration::from_secs(1));
     }
 
@@ -98,14 +96,16 @@ use std::os::raw::{
 
 #[derive(Debug)]
 struct Client {
+    ip: CString,
     handle: S7Object,
     req_len: usize,
     neg_len: usize,
 }
 
 impl Client {
-    pub fn new() -> Self {
+    pub fn new(ip: String) -> Self {
         Self {
+            ip: CString::new(ip).unwrap(),
             handle: unsafe { Cli_Create() },
             req_len: 0,
             neg_len: 0,
@@ -117,8 +117,10 @@ impl Client {
         let mut req: c_int = 0;
         let mut neg: c_int = 0;
 
+        // let ip = CString::new(self.ip).unwrap().as_ptr();
         unsafe {
-            Cli_ConnectTo(self.handle, CString::new("192.168.0.150").unwrap().as_ptr(), 0, 2);
+            #[warn(temporary_cstring_as_ptr)]
+            Cli_ConnectTo(self.handle, self.ip.as_ptr(), 0, 1);
 
             Cli_GetPduLength(self.handle, &mut req, &mut neg);
 
@@ -128,7 +130,7 @@ impl Client {
     }
 
 
-    pub fn read(&self, num: u32, start: u32, size: u32) -> Result<Vec<u8>, String> {
+    pub fn read(&self, dbNum: u32, start: u32, size: u32) -> Result<Vec<u8>, String> {
 
         let mut buf = Vec::<u8>::new();
 
@@ -138,7 +140,7 @@ impl Client {
         unsafe {
             res = Cli_DBRead(
                 self.handle,
-                num as c_int,
+                dbNum as c_int,
                 start as c_int,
                 size as c_int,
                 buf.as_mut_ptr() as *mut c_void
@@ -195,7 +197,7 @@ pub fn error_text(code: i32) -> String {
 }
 
 
-struct CtlRecord {
-    plc_counter: u64,
-    ctl_counter: u64,
-}
+// struct CtlRecord {
+//     plc_counter: u64,
+//     ctl_counter: u64,
+// }
