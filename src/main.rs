@@ -2,71 +2,61 @@
 use std;
 use std::fs;
 use std::collections::HashMap;
-// use serde_json::{self, Value};
-use serde::{Serialize, Deserialize};
-use serde_with;
+use std::env;
+mod ds_config;
+mod ds_db;
+mod ds_point;
+use ds_config::ds_config::DsConfig;
+use ds_db::ds_db::DsDb;
 
-
-// #[serde_with::skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
-pub struct DsConfig {
-    // #[serde(flatten)]
-    lines: HashMap<String, DsLineConf>,
-}
-
-#[serde_with::skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
-pub struct DsLineConf {
-    // #[serde(flatten)]
-    name: Option<String>,
-    ieds: Option<HashMap<String, DsIedConf>>,
-}
-
-#[serde_with::skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
-pub struct DsIedConf {
-    // #[serde(flatten)]
-    name: Option<String>,
-    ip: Option<String>,
-    rack: Option<u32>,
-    slot: Option<u32>,
-    dbs: Option<HashMap<String, DsDbConf>>,
-}
-
-#[serde_with::skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
-pub struct DsDbConf {
-    // #[serde(flatten)]
-    name: Option<String>,
-    description: Option<String>,
-    number: Option<u32>,
-    offset: Option<u32>,
-    size: Option<u32>,
-    delay: Option<u32>,
-    points: Option<HashMap<String, DsPointConf>>,
-}
-
-#[serde_with::skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
-pub struct DsPointConf {
-    // #[serde(flatten)]
-    dataType: Option<String>,
-    offset: Option<u32>,
-    comment: Option<String>,
-    vrt: Option<u8>,
-}
 
 fn main() {
+    env::set_var("RUST_BACKTRACE", "1");
     let dir = std::env::current_dir().unwrap();
     let path: &str = &format!("{}/conf.json", dir.to_str().unwrap());
-    let configJson = fs::read_to_string(&path)
-        .expect(&format!("Error read file {}", path));
-    let config: DsConfig = serde_json::from_str(&configJson).unwrap();
-    // for (key, line) in config.lines {
-    //     println!("line {:?}: {:?}", key, line);
-    // }
-    println!("config {:?}", config);
+    let config = DsConfig::new(path.to_string());
+    for (lineKey, line) in config.lines {
+        println!("line {:?}: ", lineKey);
+        match line.ieds {
+            None => (),
+            Some(ieds) => {
+                for (iedKey, ied) in ieds {
+                    println!("\tied {:?}: ", iedKey);
+                    match ied.dbs {
+                        None => (),
+                        Some(dbs) => {
+                            for (dbKey, dbConf) in dbs {
+                                let db = DsDb::new(dbConf);
+                                println!("\t\tdb {:?}: {:?}", dbKey, db);
+                                // match db.points {
+                                //     None => (),
+                                //     Some(points) => {
+                                //         for (pointKey, point) in points {
+                                //             println!("\t\t\tdb {:?}: {:?}", pointKey, point);
+                                //         }
+                                //     }
+                                // }
+                            }
+                        },
+                    }
+        
+                }
+            },
+        }
+    }
+    // println!("config {:?}", config);
     // config.build();
+    let mut client = Client::new();
+
+    client.connect();
+
+    println!("{:#?}", client);
+
+    loop {
+        println!("{:#?}", client.read(1420, 0, 20));
+        std::thread::sleep(std::time::Duration::from_secs(1));
+    }
+
 }
 //
 // fn build(&mut self) {
@@ -92,3 +82,120 @@ fn main() {
 //     configJson
 //     // : HashMap<String, HashMap<String, serde_json::Value>>
 // }
+
+
+
+#[macro_use]
+extern crate snap7_sys;
+
+use snap7_sys::*;
+use std::ffi::CString;
+use std::os::raw::{
+    c_int,
+    c_char,
+    c_void,
+};
+
+#[derive(Debug)]
+struct Client {
+    handle: S7Object,
+    req_len: usize,
+    neg_len: usize,
+}
+
+impl Client {
+    pub fn new() -> Self {
+        Self {
+            handle: unsafe { Cli_Create() },
+            req_len: 0,
+            neg_len: 0,
+        }
+    }
+
+    pub fn connect(&mut self) {
+
+        let mut req: c_int = 0;
+        let mut neg: c_int = 0;
+
+        unsafe {
+            Cli_ConnectTo(self.handle, CString::new("192.168.0.150").unwrap().as_ptr(), 0, 2);
+
+            Cli_GetPduLength(self.handle, &mut req, &mut neg);
+
+            self.req_len = req as usize;
+            self.neg_len = neg as usize;
+        }
+    }
+
+
+    pub fn read(&self, num: u32, start: u32, size: u32) -> Result<Vec<u8>, String> {
+
+        let mut buf = Vec::<u8>::new();
+
+        buf.resize(size as usize, 0);
+
+        let res;
+        unsafe {
+            res = Cli_DBRead(
+                self.handle,
+                num as c_int,
+                start as c_int,
+                size as c_int,
+                buf.as_mut_ptr() as *mut c_void
+            ) as i32;
+
+        }
+
+
+        if res == 0 {
+            Ok(buf)
+        } else {
+            Err(String::from(error_text(res)))
+        }
+    }
+
+    pub fn close(&mut self) {
+
+        unsafe {
+            Cli_Disconnect(self.handle);
+        }
+    }
+}
+
+impl Drop for Client {
+    fn drop(&mut self) {
+
+        self.close();
+
+        unsafe {
+            Cli_Destroy(&mut self.handle);
+        }
+    }
+}
+
+
+pub fn error_text(code: i32) -> String {
+    let mut err = Vec::<u8>::new();
+
+        err.resize(1024, 0);
+
+        unsafe {
+            Cli_ErrorText(code as c_int, err.as_mut_ptr() as *mut c_char, err.len() as c_int);
+        }
+
+        if let Some(i) = err.iter().position(|&r| r == 0) {
+            err.truncate(i);
+        }
+
+        let err = unsafe {
+            std::str::from_utf8_unchecked(&err)
+        };
+
+        err.to_owned()
+}
+
+
+struct CtlRecord {
+    plc_counter: u64,
+    ctl_counter: u64,
+}
