@@ -85,8 +85,8 @@ fn main() {
 
 
 
-#[macro_use]
-extern crate snap7_sys;
+// #[macro_use]
+// extern crate snap7_sys;
 
 use snap7_sys::*;
 use std::ffi::CString;
