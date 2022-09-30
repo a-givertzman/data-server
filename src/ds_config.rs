@@ -61,10 +61,13 @@ pub mod ds_config {
     #[derive(Debug, Serialize, Deserialize)]
     pub struct DsPointConf {
         // #[serde(flatten)]
+        pub vrt: Option<u8>,
         pub dataType: Option<String>,
         pub offset: Option<u32>,
+        pub bit: Option<u8>,
+        pub h: Option<u8>,
+        pub a: Option<u8>,
         pub comment: Option<String>,
-        pub vrt: Option<u8>,
     }
     
 }

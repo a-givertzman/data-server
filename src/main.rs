@@ -1,6 +1,9 @@
 #![allow(non_snake_case)]
 use std;
+use std::any::{Any, TypeId};
+use std::collections::HashMap;
 use std::env;
+use std::process::exit;
 mod ds_config;
 mod ds_db;
 mod ds_point;
@@ -50,12 +53,81 @@ fn main() {
 
     println!("{:#?}", client);
 
+    type fnConv = fn(i32, &str);
+    let toI: fnConv = |a: i32, b: &str| {println!("a: {:#?}", a);};
+    let toS: fnConv = |a: i32, b: &str| {println!("b: {:#?}", b);};
+    let convert = HashMap::from([
+        ("toInt", &toI), 
+        ("toStr", &toS), 
+    ]);
+    let vInt = 12;
+    let vStr = "test";
+    let mut conv: fnConv = |_, _| {};
+    if (typeOf(&vInt) == "i32") {
+        conv = *convert["toInt"];
+    }
+    conv(12, "");
+    if (typeOf(&vStr) == "&str") {
+        conv = *convert["toStr"];
+    }
+    conv(0, "test");
+
+    exit(0);
     loop {
-        println!("{:#?}", client.read(899, 0, 34));
+        let bytes = client.read(899, 0, 34).unwrap();
+        println!("{:#?}", bytes);
+
+        let driveSpeed = toReal(&bytes, 0);
+        println!("driveSpeed: {:#?}", driveSpeed);
+
+        let driveOutputVoltage = toReal(&bytes, 4);
+        println!("driveOutputVoltage: {:#?}", driveOutputVoltage);
+
+        let driveDCVoltage = toReal(&bytes, 8);
+        println!("driveDCVoltage: {:#?}", driveDCVoltage);
+
+        let driveCurrent = toReal(&bytes, 12);
+        println!("driveCurrent: {:#?}", driveCurrent);
+
+        let driveTorque = toReal(&bytes, 16);
+        println!("driveTorque: {:#?}", driveTorque);
+        let drivepositionFromMru = toReal(&bytes, 20);
+        println!("drivepositionFromMru: {:#?}", drivepositionFromMru);
+        let drivepositionFromHoist = toReal(&bytes, 24);
+        println!("drivepositionFromHoist: {:#?}", drivepositionFromHoist);
+        let capacitorCapacity = toInt(&bytes, 28);
+        println!("capacitorCapacity: {:#?}", capacitorCapacity);
+        let chargeInOn = toBool(&bytes, 30, 0);
+        println!("chargeInOn: {:#?}", chargeInOn);
+        let chargeOutOn = toBool(&bytes, 32, 0);
+        println!("chargeOutOn: {:#?}", chargeOutOn);
+
         std::thread::sleep(std::time::Duration::from_secs(1));
     }
-
 }
+
+fn typeOf<T>(_: &T) -> &str {
+    std::any::type_name::<T>()
+}
+
+
+fn toBool(bytes: &Vec<u8>, start: usize, bit: usize) -> bool {
+    let i = toInt(&bytes, start);
+    let b = i >> bit & 1;
+    b > 0
+    // f32::from_be_bytes(bytes[start..end].try_into().unwrap())
+}
+
+fn toInt(bytes: &Vec<u8>, start: usize) -> i16 {
+    let end = start + 2;
+    i16::from_be_bytes(bytes[start..end].try_into().expect("Conversion error"))
+}
+
+fn toReal(bytes: &Vec<u8>, start: usize) -> f32 {
+    let end = start + 4;
+    f32::from_be_bytes(bytes[start..end].try_into().unwrap())
+}
+
 //
 // fn build(&mut self) {
 //     let configJson = self._readFromFile(&self._path);
