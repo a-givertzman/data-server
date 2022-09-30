@@ -3,12 +3,43 @@ use std;
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::env;
-use std::process::exit;
 mod ds_config;
 mod ds_db;
 mod ds_point;
+mod s7_parse_point;
 use ds_config::ds_config::DsConfig;
 use ds_db::ds_db::DsDb;
+
+
+
+#[derive(Debug)]
+pub struct PointInt<T> {
+    v: T,
+}
+
+impl PointInt<i16> {
+    pub fn convert(&self) -> i16 {
+        i16::from(16i16)
+    }
+}
+
+impl PointInt<bool> {
+    pub fn convert(&self) -> bool {
+        bool::from(true)
+    }
+}
+
+// trait Point<T> where T: From<i16> + From<f32>,  {
+//     type Output;
+//     fn convert() -> T;
+// }
+
+// impl<T> Point<T> for PointInt {
+//     type Output = i16;
+//     fn convert() -> T where T: From<i16>, {
+//         i16::from(1)
+//     }
+// }
 
 
 fn main() {
@@ -53,26 +84,33 @@ fn main() {
 
     println!("{:#?}", client);
 
-    type fnConv = fn(i32, &str);
-    let toI: fnConv = |a: i32, b: &str| {println!("a: {:#?}", a);};
-    let toS: fnConv = |a: i32, b: &str| {println!("b: {:#?}", b);};
-    let convert = HashMap::from([
-        ("toInt", &toI), 
-        ("toStr", &toS), 
-    ]);
-    let vInt = 12;
-    let vStr = "test";
-    let mut conv: fnConv = |_, _| {};
-    if (typeOf(&vInt) == "i32") {
-        conv = *convert["toInt"];
-    }
-    conv(12, "");
-    if (typeOf(&vStr) == "&str") {
-        conv = *convert["toStr"];
-    }
-    conv(0, "test");
+    // type fnConv = fn(i32, &str);
+    // let toI: fnConv = |a: i32, b: &str| {println!("a: {:#?}", a);};
+    // let toS: fnConv = |a: i32, b: &str| {println!("b: {:#?}", b);};
+    // let convert = HashMap::from([
+    //     ("toInt", &toI), 
+    //     ("toStr", &toS), 
+    // ]);
+    // let vInt = 12;
+    // let vStr = "test";
+    // let mut conv: fnConv = |_, _| {};
+    // if (typeOf(&vInt) == "i32") {
+    //     conv = *convert["toInt"];
+    // }
+    // conv(12, "");
+    // if (typeOf(&vStr) == "&str") {
+    //     conv = *convert["toStr"];
+    // }
+    // conv(0, "test");
 
-    exit(0);
+    let pBool = PointInt::<bool>{v: true };
+    println!("pBool: {:#?}", &pBool);
+    let convertedBool = pBool.convert();
+    println!("convertedBool: {:#?}", convertedBool);
+    let pInt = PointInt::<i16>{v: 0i16 };
+    let convertedInt = pInt.convert();
+    println!("convertedInt: {:#?}", convertedInt);
+    println!("pInt: {:#?}", pInt);
     loop {
         let bytes = client.read(899, 0, 34).unwrap();
         println!("{:#?}", bytes);
@@ -165,6 +203,8 @@ use std::os::raw::{
     c_char,
     c_void,
 };
+
+use crate::s7_parse_point::s7_parse_point::S7ParsePoint;
 
 #[derive(Debug)]
 struct Client {
