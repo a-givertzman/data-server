@@ -1,12 +1,11 @@
 #![allow(non_snake_case)]
 
 pub mod s7_parse_point {
-    use std::{io::Error, collections::HashMap};
+    use std::{array::TryFromSliceError};
+    use log::{debug, error, info, warn};
 
     use crate::{ds_config::ds_config::{DsPointConf}};
 
-    #[feature(specialization)]
-       
     #[derive(Debug)]
     pub struct S7ParsePoint<T> {
         v: T,
@@ -30,7 +29,7 @@ pub mod s7_parse_point {
             where
                 T: From<i16> + From<f32> + From<bool>,
         {
-            S7ParsePoint{
+            S7ParsePoint {
                 v: T::from(0i16),
                 vrt: config.vrt,
                 dataType: config.dataType,
@@ -41,31 +40,45 @@ pub mod s7_parse_point {
                 comment: config.comment,
             }
         }
-        ///
-        fn toBool<K>(&self, bytes: &Vec<u8>, start: usize, bit: usize) -> Result<K, Error> // bool
-        where
-            K: From<bool>,
-        {
-            let i: i16 = self.toInt(&bytes, start, 0).unwrap();
-            let b: i16 = i >> bit & 1;
-            Ok(K::from(b > 0))
-            // f32::from_be_bytes(bytes[start..end].try_into().unwrap())
+    }
+    ///
+    impl S7ParsePoint<bool> {
+        fn convert(&self, bytes: &Vec<u8>, start: usize, bit: usize) -> Result<bool, TryFromSliceError> {
+            match bytes[start..(start + 2)].try_into() {
+                Ok(v) => {
+                    let i = i16::from_be_bytes(v);
+                    let b: i16 = i >> bit & 1;
+                    Ok(b > 0)
+                },
+                Err(e) => {
+                    error!("ERROR in S7ParsePoint<i16>: {}", e);
+                    Err(e)
+                }
+            }
         }
-        ///
-        fn toInt<K>(&self, bytes: &Vec<u8>, start: usize, bit: usize) -> Result<K, Error> // i16
-        where
-            K: From<i16>,
-        {
-            let end = start + 2;
-            Ok(K::from(i16::from_be_bytes(bytes[start..end].try_into().expect("Conversion error"))))
+    }
+    ///
+    impl S7ParsePoint<i16> {
+        fn convert(&self, bytes: &Vec<u8>, start: usize) -> Result<i16, TryFromSliceError> {
+            match bytes[start..(start + 2)].try_into() {
+                Ok(v) => Ok(i16::from_be_bytes(v)),
+                Err(e) => {
+                    error!("ERROR in S7ParsePoint<i16>: {}", e);
+                    Err(e)
+                }
+            }
         }
-        ///
-        fn toReal<K>(&self, bytes: &Vec<u8>, start: usize, bit: usize) -> Result<K, Error> // f32 
-        where
-            K: From<f32>,
-        {
-            let end = start + 4;
-            Ok(K::from(f32::from_be_bytes(bytes[start..end].try_into().unwrap())))
+    }
+    ///
+    impl S7ParsePoint<f32> {
+        fn convert(&self, bytes: &Vec<u8>, start: usize) -> Result<f32, TryFromSliceError> {
+            match bytes[start..(start + 4)].try_into() {
+                Ok(v) => Ok(f32::from_be_bytes(v)),
+                Err(e) => {
+                    error!("ERROR in S7ParsePoint<f32>: {}", e);
+                    Err(e)
+                }
+            }
         }        
     }
 }

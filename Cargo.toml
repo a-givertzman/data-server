@@ -13,3 +13,4 @@ snap7 = "0.0.1"
 snap7-sys = "0.1.4"
 libc = "0.2.134"
 bindgen = "0.51.1"
+log = { version = "0.4", features = ["std", "serde"] }
