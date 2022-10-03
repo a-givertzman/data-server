@@ -1,6 +1,5 @@
 #![allow(non_snake_case)]
 use std;
-use std::any::Any;
 use std::collections::HashMap;
 use std::env;
 mod ds_config;
@@ -9,6 +8,7 @@ mod ds_point;
 mod s7_parse_point;
 use ds_config::ds_config::DsConfig;
 use ds_db::ds_db::DsDb;
+use crate::s7_parse_point::s7_parse_point::{ParsePointType, S7ParsePointBool, S7ParsePointInt, S7ParsePointReal, ParsePoint};
 
 
 
@@ -69,20 +69,40 @@ fn main() {
                                     Some(points) => {
                                         for (pointKey, point) in points {
                                             println!("\t\t\tdb {:?}: {:?}", pointKey, &point);
-                                            let dataType = &point.dataType.unwrap();
+                                            let dataType = &point.dataType.clone().unwrap();
                                             if *dataType == "Bool".to_string() {
                                                 parsePoints.insert(
                                                     pointKey.clone(),
-                                                    PointConfVar::PBool(PointBool{v: true}),
+                                                    ParsePointType::Bool(
+                                                        S7ParsePointBool::new(
+                                                            pointKey.clone(),
+                                                            pointKey.clone(),
+                                                          point,
+                                                        ),
+                                                    ),
                                                 );
-                                            }
-                                            if *dataType == "Int".to_string() {
+                                            } else if *dataType == "Int".to_string() {
                                                 parsePoints.insert(
-                                                    pointKey,
-                                                    PointConfVar::PInt(PointInt{v: 0}),
+                                                    pointKey.clone(),
+                                                    ParsePointType::Int(
+                                                        S7ParsePointInt::new(
+                                                            pointKey.clone(), 
+                                                            pointKey.clone(), 
+                                                            point,
+                                                        ),
+                                                    ),
                                                 );
-                                            }
-                                            if *dataType == "Real".to_string() {
+                                            } else if *dataType == "Real".to_string() {
+                                                parsePoints.insert(
+                                                    pointKey.clone(),
+                                                    ParsePointType::Real(
+                                                        S7ParsePointReal::new(
+                                                            pointKey.clone(), 
+                                                            pointKey.clone(), 
+                                                            point,
+                                                        ),
+                                                    ),
+                                                );
                                             }
                                         }
                                     }
@@ -97,12 +117,12 @@ fn main() {
     }
     // println!("config {:?}", config);
     // config.build();
-    // let mut client = Client::new(String::from("192.168.120.241"));
+    let mut client = Client::new(String::from("192.168.120.241"));
 
-    // client.connect();
+    client.connect();
 
     println!("parsePoints: {:#?}", parsePoints);
-    // println!("client: {:#?}", client);
+    println!("client: {:#?}", client);
 
     // type fnConv = fn(i32, &str);
     // let toI: fnConv = |a: i32, b: &str| {println!("a: {:#?}", a);};
@@ -122,7 +142,6 @@ fn main() {
     //     conv = *convert["toStr"];
     // }
     // conv(0, "test");
-
     let pBool = PointBool{v: true};
     println!("pBool: {:#?}", &pBool);
     let convertedBool = pBool.convert();
@@ -131,37 +150,55 @@ fn main() {
     let convertedInt = pInt.convert();
     println!("convertedInt: {:#?}", convertedInt);
     println!("pInt: {:#?}", pInt);
-    // loop {
-    //     let bytes = client.read(899, 0, 34).unwrap();
-    //     println!("{:#?}", bytes);
+    loop {
+        let bytes = client.read(899, 0, 34).unwrap();
+        print!("\x1B[2J\x1B[1;1H");
+        println!("{:#?}", bytes);
+        for (key, pointType) in &parsePoints {
+            match pointType.clone() {
+                ParsePointType::Bool(mut point) => {
+                    point.addRaw(&bytes);
+                    println!("point Bool: {:#?}", point);
+                },
+                ParsePointType::Int(mut point) => {
+                    point.addRaw(&bytes);
+                    println!("point Int: {:#?}", point);
+                },
+                ParsePointType::Real(mut point) => {
+                    point.addRaw(&bytes);
+                    println!("point Real: {:#?}", point);
+                },
+            }
+        }
 
-    //     let driveSpeed = toReal(&bytes, 0);
-    //     println!("driveSpeed: {:#?}", driveSpeed);
 
-    //     let driveOutputVoltage = toReal(&bytes, 4);
-    //     println!("driveOutputVoltage: {:#?}", driveOutputVoltage);
+        // let driveSpeed = toReal(&bytes, 0);
+        // println!("driveSpeed: {:#?}", driveSpeed);
 
-    //     let driveDCVoltage = toReal(&bytes, 8);
-    //     println!("driveDCVoltage: {:#?}", driveDCVoltage);
+        // let driveOutputVoltage = toReal(&bytes, 4);
+        // println!("driveOutputVoltage: {:#?}", driveOutputVoltage);
 
-    //     let driveCurrent = toReal(&bytes, 12);
-    //     println!("driveCurrent: {:#?}", driveCurrent);
+        // let driveDCVoltage = toReal(&bytes, 8);
+        // println!("driveDCVoltage: {:#?}", driveDCVoltage);
 
-    //     let driveTorque = toReal(&bytes, 16);
-    //     println!("driveTorque: {:#?}", driveTorque);
-    //     let drivepositionFromMru = toReal(&bytes, 20);
-    //     println!("drivepositionFromMru: {:#?}", drivepositionFromMru);
-    //     let drivepositionFromHoist = toReal(&bytes, 24);
-    //     println!("drivepositionFromHoist: {:#?}", drivepositionFromHoist);
-    //     let capacitorCapacity = toInt(&bytes, 28);
-    //     println!("capacitorCapacity: {:#?}", capacitorCapacity);
-    //     let chargeInOn = toBool(&bytes, 30, 0);
-    //     println!("chargeInOn: {:#?}", chargeInOn);
-    //     let chargeOutOn = toBool(&bytes, 32, 0);
-    //     println!("chargeOutOn: {:#?}", chargeOutOn);
+        // let driveCurrent = toReal(&bytes, 12);
+        // println!("driveCurrent: {:#?}", driveCurrent);
 
-    //     std::thread::sleep(std::time::Duration::from_secs(1));
-    // }
+        // let driveTorque = toReal(&bytes, 16);
+        // println!("driveTorque: {:#?}", driveTorque);
+        // let drivepositionFromMru = toReal(&bytes, 20);
+        // println!("drivepositionFromMru: {:#?}", drivepositionFromMru);
+        // let drivepositionFromHoist = toReal(&bytes, 24);
+        // println!("drivepositionFromHoist: {:#?}", drivepositionFromHoist);
+        // let capacitorCapacity = toInt(&bytes, 28);
+        // println!("capacitorCapacity: {:#?}", capacitorCapacity);
+        // let chargeInOn = toBool(&bytes, 30, 0);
+        // println!("chargeInOn: {:#?}", chargeInOn);
+        // let chargeOutOn = toBool(&bytes, 32, 0);
+        // println!("chargeOutOn: {:#?}", chargeOutOn);
+
+        std::thread::sleep(std::time::Duration::from_secs(1));
+    }
 }
 
 // fn typeOf<T>(_: &T) -> &str {

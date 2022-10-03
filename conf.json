@@ -17,17 +17,57 @@
                         "size": 34,
                         "delay": 10,
                         "points": {
-                            "point1.1.1": {
-                                "dataType": "Int",
-                                "comment": "Point 1.1.1",
-                                "offset": 0,
-                                "vrt": 1
+                            "Drive.Speed": {
+                                "dataType": "Real",
+                                "comment": "Drive.Speed",
+                                "offset": 0
                             },
-                            "point1.1.2": {
-                                "dataType": "Int",
-                                "comment": "Point 1.1.2",
-                                "offset": 2,
-                                "vrt": 1
+                            "Drive.OutputVoltage": {
+                                "dataType": "Real",
+                                "comment": "Drive.OutputVoltage",
+                                "offset": 4
+                            },
+                            "Drive.DCVoltage": {
+                                "dataType": "Real",
+                                "comment": "Drive.DCVoltage",
+                                "offset": 8
+                            },
+                            "Drive.Current": {
+                                "dataType": "Real",
+                                "comment": "Drive.Current",
+                                "offset": 12
+                            },
+                            "Drive.Torque": {
+                                "dataType": "Real",
+                                "comment": "Drive.Torque",
+                                "offset": 16
+                            },
+                            "Drive.positionFromMru": {
+                                "dataType": "Real",
+                                "comment": "Drive.positionFromMru",
+                                "offset": 20
+                            },
+                            "Drive.positionFromHoist": {
+                                "dataType": "Real",
+                                "comment": "Point 1.1.2Drive.positionFromHoist",
+                                "offset": 24
+                            },
+                            "Capacitor.Capacity": {
+                                "dataType": "Real",
+                                "comment": "Capacitor.Capacity",
+                                "offset": 28
+                            },
+                            "ChargeIn.On": {
+                                "dataType": "Bool",
+                                "comment": "ChargeIn.On",
+                                "offset": 30,
+                                "bit": 0
+                            },
+                            "ChargeOut.On": {
+                                "dataType": "Bool",
+                                "comment": "ChargeOut.On",
+                                "offset": 32,
+                                "bit": 0
                             }
                         }
                     }

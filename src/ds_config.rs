@@ -45,6 +45,7 @@ pub mod ds_config {
     }
     
     #[serde_with::skip_serializing_none]
+    // #[derive(Clone)]: #[derive(Clone)]
     #[derive(Debug, Serialize, Deserialize)]
     pub struct DsDbConf {
         // #[serde(flatten)]

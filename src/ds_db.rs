@@ -3,7 +3,7 @@
 pub mod ds_db {
     use std::collections::HashMap;
 
-    use crate::{ds_config::ds_config::{DsDbConf}, ds_point::ds_point::DsPoint};
+    use crate::{ds_config::ds_config::{DsDbConf, DsPointConf}, ds_point::ds_point::DsPoint};
 
     #[derive(Debug)]
     pub struct DsDb {
@@ -13,7 +13,7 @@ pub mod ds_db {
         pub offset: Option<u32>,
         pub size: Option<u32>,
         pub delay: Option<u32>,
-        pub points: Option<HashMap<String, DsPoint>>,
+        pub points: Option<HashMap<String, DsPointConf>>,
     }
     impl DsDb {
         pub fn new(
@@ -21,22 +21,22 @@ pub mod ds_db {
         ) -> DsDb {
             let mut localPoints: HashMap<String, DsPoint> = HashMap::new();
             let path = config.name.clone().unwrap();
-            match config.points {
-                None => (),
-                Some(points) => {
-                    for (pointKey, pointConf) in points {
-                        // println!("\t\t\tdb {:?}: {:?}", &pointKey, pointConf);
-                        localPoints.insert(
-                            pointKey.clone(),
-                            DsPoint::new(
-                                pointKey, 
-                                path.clone(), 
-                                pointConf
-                            ),
-                        );
-                    }
-                }
-            }
+            // match config.points {
+            //     None => (),
+            //     Some(points) => {
+            //         for (pointKey, pointConf) in points {
+            //             // println!("\t\t\tdb {:?}: {:?}", &pointKey, pointConf);
+            //             localPoints.insert(
+            //                 pointKey.clone(),
+            //                 DsPoint::new(
+            //                     pointKey, 
+            //                     path.clone(), 
+            //                     pointConf
+            //                 ),
+            //             );
+            //         }
+            //     }
+            // }
             DsDb {
                 name: config.name,
                 description: config.description,
@@ -44,7 +44,7 @@ pub mod ds_db {
                 offset: config.offset,
                 size: config.size,
                 delay: config.delay,
-                points: Some(localPoints),
+                points: config.points,  // Some(localPoints),
             }
     
         }
