@@ -42,8 +42,20 @@
                     "db1": {
                         "name": "DB1",
                         "points": {
-                            "point1.2.1": {},
-                            "point1.2.2": {}
+                            "point1.2.1": {
+                                "dataType": "Bool",
+                                "comment": "Point 1.2.1",
+                                "offset": 2,
+                                "bit": 0,
+                                "vrt": 1
+                            },
+                            "point1.2.2": {
+                                "dataType": "Bool",
+                                "comment": "Point 1.2.1",
+                                "offset": 2,
+                                "bit": 1,
+                                "vrt": 1
+                            }
                         }    
                     }
                 }
@@ -63,8 +75,18 @@
                     "db1": {
                         "name": "DB1",
                         "points": {
-                            "point2.1.1": {},
-                            "point2.1.2": {}            
+                            "point2.1.1": {
+                                "dataType": "Bool",
+                                "comment": "Point 2.1.1",
+                                "offset": 2,
+                                "bit": 0
+                            },
+                            "point2.1.2": {
+                                "dataType": "Bool",
+                                "comment": "Point 2.1.2",
+                                "offset": 2,
+                                "bit": 1
+                            }            
                         }
                     }
                 }
@@ -79,8 +101,16 @@
                     "db1": {
                         "name": "DB1",
                         "points": {
-                            "point2.2.1": {},
-                            "point2.2.2": {}
+                            "point2.2.1": {
+                                "dataType": "Real",
+                                "comment": "Point 2.2.1",
+                                "offset": 2
+                            },
+                            "point2.2.2": {
+                                "dataType": "Real",
+                                "comment": "Point 2.2.2",
+                                "offset": 6
+                            }
                         }
                     }
                 }
