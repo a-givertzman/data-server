@@ -106,15 +106,16 @@ pub mod ds_db {
                     match pointType.clone() {
                         ParsePointType::Bool(mut point) => {
                             point.addRaw(&bytes);
-                            println!("point Bool: {:#?}", point);
+                            println!("point {:#?} Bool: {:#?}", key, point);
                         },
                         ParsePointType::Int(mut point) => {
                             point.addRaw(&bytes);
+                            println!("point {:#?} Int: {:#?}", key, point);
                             println!("point Int: {:#?}", point);
                         },
                         ParsePointType::Real(mut point) => {
                             point.addRaw(&bytes);
-                            println!("point Real: {:#?}", point);
+                            println!("point {:#?} Real: {:#?}", key, point);
                         },
                     }
                 }
