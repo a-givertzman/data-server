@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-pub mod ds_s7_client {
+pub mod s7_client {
     // #[macro_use]
     // extern crate snap7_sys;
 

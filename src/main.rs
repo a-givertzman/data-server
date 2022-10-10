@@ -1,12 +1,13 @@
 #![allow(non_snake_case)]
-use std;
-use std::collections::HashMap;
-use std::env;
 mod ds_config;
 mod ds_db;
 mod ds_point;
 mod s7_parse_point;
-pub mod ds_s7_client;
+pub mod s7_client;
+
+use std;
+use std::env;
+use std::collections::HashMap;
 use ds_config::ds_config::DsConfig;
 use ds_db::ds_db::DsDb;
 

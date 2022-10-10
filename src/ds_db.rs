@@ -4,7 +4,7 @@ pub mod ds_db {
     use std::collections::{HashMap, hash_map::RandomState};
 
     use crate::{
-        ds_s7_client::ds_s7_client::S7Client,
+        s7_client::s7_client::S7Client,
         ds_config::ds_config::{
             DsDbConf, 
             DsPointConf
