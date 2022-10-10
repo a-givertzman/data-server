@@ -6,6 +6,7 @@ mod ds_config;
 mod ds_db;
 mod ds_point;
 mod s7_parse_point;
+pub mod ds_s7_client;
 use ds_config::ds_config::DsConfig;
 use ds_db::ds_db::DsDb;
 use crate::s7_parse_point::s7_parse_point::{ParsePointType, S7ParsePointBool, S7ParsePointInt, S7ParsePointReal, ParsePoint};
@@ -50,7 +51,7 @@ fn main() {
     let dir = std::env::current_dir().unwrap();
     let path: &str = &format!("{}/conf.json", dir.to_str().unwrap());
     let config = DsConfig::new(path.to_string());
-    let mut parsePoints = HashMap::new();
+    let mut localDbs: HashMap<String, DsDb> = HashMap::new();
     for (lineKey, line) in config.lines {
         println!("line {:?}: ", lineKey);
         match line.ieds {
@@ -62,51 +63,53 @@ fn main() {
                         None => (),
                         Some(dbs) => {
                             for (dbKey, dbConf) in dbs {
-                                let db = DsDb::new(dbConf);
-                                println!("\t\tdb {:?}: {:?}", dbKey, db);
-                                match db.points {
-                                    None => (),
-                                    Some(points) => {
-                                        for (pointKey, point) in points {
-                                            println!("\t\t\tdb {:?}: {:?}", pointKey, &point);
-                                            let dataType = &point.dataType.clone().unwrap();
-                                            if *dataType == "Bool".to_string() {
-                                                parsePoints.insert(
-                                                    pointKey.clone(),
-                                                    ParsePointType::Bool(
-                                                        S7ParsePointBool::new(
-                                                            pointKey.clone(),
-                                                            pointKey.clone(),
-                                                          point,
-                                                        ),
-                                                    ),
-                                                );
-                                            } else if *dataType == "Int".to_string() {
-                                                parsePoints.insert(
-                                                    pointKey.clone(),
-                                                    ParsePointType::Int(
-                                                        S7ParsePointInt::new(
-                                                            pointKey.clone(), 
-                                                            pointKey.clone(), 
-                                                            point,
-                                                        ),
-                                                    ),
-                                                );
-                                            } else if *dataType == "Real".to_string() {
-                                                parsePoints.insert(
-                                                    pointKey.clone(),
-                                                    ParsePointType::Real(
-                                                        S7ParsePointReal::new(
-                                                            pointKey.clone(), 
-                                                            pointKey.clone(), 
-                                                            point,
-                                                        ),
-                                                    ),
-                                                );
-                                            }
-                                        }
-                                    }
-                                }
+                                let mut db = DsDb::new(dbConf);
+                                println!("\t\tdb {:?}: {:?}", dbKey, &db);
+                                db.run();
+                                localDbs.insert(dbKey, db);
+                                // match db.points {
+                                //     None => (),
+                                //     Some(points) => {
+                                //         for (pointKey, point) in points {
+                                //             println!("\t\t\tdb {:?}: {:?}", &pointKey, &point);
+                                //             let dataType = &point.dataType.clone().unwrap();
+                                //             if *dataType == "Bool".to_string() {
+                                //                 parsePoints.insert(
+                                //                     pointKey.clone(),
+                                //                     ParsePointType::Bool(
+                                //                         S7ParsePointBool::new(
+                                //                             db.name.clone(),
+                                //                             pointKey,
+                                //                           point,
+                                //                         ),
+                                //                     ),
+                                //                 );
+                                //             } else if *dataType == "Int".to_string() {
+                                //                 parsePoints.insert(
+                                //                     pointKey.clone(),
+                                //                     ParsePointType::Int(
+                                //                         S7ParsePointInt::new(
+                                //                             db.name.clone(),
+                                //                             pointKey, 
+                                //                             point,
+                                //                         ),
+                                //                     ),
+                                //                 );
+                                //             } else if *dataType == "Real".to_string() {
+                                //                 parsePoints.insert(
+                                //                 pointKey.clone(),
+                                //                     ParsePointType::Real(
+                                //                         S7ParsePointReal::new(
+                                //                             db.name.clone(),
+                                //                             pointKey, 
+                                //                             point,
+                                //                         ),
+                                //                     ),
+                                //                 );
+                                //             }
+                                //         }
+                                //     }
+                                // }
                             }
                         },
                     }
@@ -117,12 +120,6 @@ fn main() {
     }
     // println!("config {:?}", config);
     // config.build();
-    let mut client = Client::new(String::from("192.168.120.241"));
-
-    client.connect();
-
-    println!("parsePoints: {:#?}", parsePoints);
-    println!("client: {:#?}", client);
 
     // type fnConv = fn(i32, &str);
     // let toI: fnConv = |a: i32, b: &str| {println!("a: {:#?}", a);};
@@ -150,26 +147,6 @@ fn main() {
     let convertedInt = pInt.convert();
     println!("convertedInt: {:#?}", convertedInt);
     println!("pInt: {:#?}", pInt);
-    loop {
-        let bytes = client.read(899, 0, 34).unwrap();
-        print!("\x1B[2J\x1B[1;1H");
-        println!("{:#?}", bytes);
-        for (key, pointType) in &parsePoints {
-            match pointType.clone() {
-                ParsePointType::Bool(mut point) => {
-                    point.addRaw(&bytes);
-                    println!("point Bool: {:#?}", point);
-                },
-                ParsePointType::Int(mut point) => {
-                    point.addRaw(&bytes);
-                    println!("point Int: {:#?}", point);
-                },
-                ParsePointType::Real(mut point) => {
-                    point.addRaw(&bytes);
-                    println!("point Real: {:#?}", point);
-                },
-            }
-        }
 
 
         // let driveSpeed = toReal(&bytes, 0);
@@ -197,8 +174,6 @@ fn main() {
         // let chargeOutOn = toBool(&bytes, 32, 0);
         // println!("chargeOutOn: {:#?}", chargeOutOn);
 
-        std::thread::sleep(std::time::Duration::from_secs(1));
-    }
 }
 
 // fn typeOf<T>(_: &T) -> &str {
@@ -245,107 +220,4 @@ fn main() {
 //     println!("configJson: {:?}", configJson);
 //     configJson
 //     // : HashMap<String, HashMap<String, serde_json::Value>>
-// }
-
-
-
-// #[macro_use]
-// extern crate snap7_sys;
-
-use snap7_sys::*;
-use std::ffi::CString;
-use std::os::raw::{
-    c_int,
-    c_char,
-    c_void,
-};
-
-
-#[derive(Debug)]
-struct Client {
-    ip: CString,
-    handle: S7Object,
-    req_len: usize,
-    neg_len: usize,
-}
-
-impl Client {
-    pub fn new(ip: String) -> Self {
-        Self {
-            ip: CString::new(ip).unwrap(),
-            handle: unsafe { Cli_Create() },
-            req_len: 0,
-            neg_len: 0,
-        }
-    }
-    pub fn connect(&mut self) {
-        let mut req: c_int = 0;
-        let mut neg: c_int = 0;
-        unsafe {
-            #[warn(temporary_cstring_as_ptr)]
-            Cli_ConnectTo(self.handle, self.ip.as_ptr(), 0, 1);
-            Cli_GetPduLength(self.handle, &mut req, &mut neg);
-            self.req_len = req as usize;
-            self.neg_len = neg as usize;
-        }
-    }
-    pub fn read(&self, dbNum: u32, start: u32, size: u32) -> Result<Vec<u8>, String> {
-        let mut buf = Vec::<u8>::new();
-        buf.resize(size as usize, 0);
-        let res;
-        unsafe {
-            res = Cli_DBRead(
-                self.handle,
-                dbNum as c_int,
-                start as c_int,
-                size as c_int,
-                buf.as_mut_ptr() as *mut c_void
-            ) as i32;
-
-        }
-        if res == 0 {
-            Ok(buf)
-        } else {
-            Err(String::from(error_text(res)))
-        }
-    }
-    pub fn close(&mut self) {
-        unsafe {
-            Cli_Disconnect(self.handle);
-        }
-    }
-}
-
-impl Drop for Client {
-    fn drop(&mut self) {
-        self.close();
-        unsafe {
-            Cli_Destroy(&mut self.handle);
-        }
-    }
-}
-
-pub fn error_text(code: i32) -> String {
-    let mut err = Vec::<u8>::new();
-    err.resize(1024, 0);
-    unsafe {
-        Cli_ErrorText(
-            code as c_int, 
-            err.as_mut_ptr() as *mut c_char, 
-            err.len() as c_int
-        );
-    }
-    if let Some(i) = err.iter().position(|&r| r == 0) {
-        err.truncate(i);
-    }
-    let err = unsafe {
-        std::str::from_utf8_unchecked(&err)
-    };
-    err.to_owned()
-}
-
-
-// struct CtlRecord {
-//     plc_counter: u64,
-//     ctl_counter: u64,
 // }

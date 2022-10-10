@@ -19,8 +19,7 @@ pub mod ds_config {
             let configJson = fs::read_to_string(&path)
                 .expect(&format!("Error read file {}", path));
             let lines: HashMap<String, DsLineConf> = serde_json::from_str(&configJson).unwrap();
-        
-            DsConfig { lines:  lines}
+            DsConfig{lines}
         }
     }
     
@@ -36,7 +35,7 @@ pub mod ds_config {
     #[derive(Debug, Serialize, Deserialize)]
     pub struct DsIedConf {
         // #[serde(flatten)]
-        pub name: Option<String>,
+        pub name: String,
         pub description: Option<String>,
         pub ip: Option<String>,
         pub rack: Option<u32>,
@@ -49,7 +48,7 @@ pub mod ds_config {
     #[derive(Debug, Serialize, Deserialize)]
     pub struct DsDbConf {
         // #[serde(flatten)]
-        pub name: Option<String>,
+        pub name: String,
         pub description: Option<String>,
         pub number: Option<u32>,
         pub offset: Option<u32>,
@@ -59,7 +58,7 @@ pub mod ds_config {
     }
     
     #[serde_with::skip_serializing_none]
-    #[derive(Debug, Serialize, Deserialize)]
+    #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct DsPointConf {
         // #[serde(flatten)]
         pub vrt: Option<u8>,
