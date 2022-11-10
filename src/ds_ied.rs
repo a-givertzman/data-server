@@ -23,7 +23,7 @@ pub mod ds_ied {
         pub fn new(
             config: DsIedConf,
         ) -> DsIed {
-            let path = match config.name.clone() { None => String::from("Unnamed DsIed"), Some(v) => v };
+            let path = config.name.clone();
             let mut dbs: HashMap<String, DsDb> = HashMap::new();
             match config.dbs.clone() {
                 None => (),
@@ -39,7 +39,7 @@ pub mod ds_ied {
                 }
             }
             DsIed {
-                name: match config.name { None => String::new(), Some(v) => v },
+                name: config.name,
                 description: config.description,
                 ip: match config.ip { None => String::new(), Some(v) => v },
                 rack: match config.rack { None => 0, Some(v) => v },

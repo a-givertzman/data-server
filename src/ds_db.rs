@@ -27,7 +27,7 @@ pub mod ds_db {
         pub fn new(
             config: DsDbConf,
         ) -> DsDb {
-            let path = config.name.clone().unwrap();
+            let path = config.name.clone();
             let mut dbPoints: HashMap<String, ParsePointType> = HashMap::new();
             match config.points.clone() {
                 None => (),
@@ -75,7 +75,7 @@ pub mod ds_db {
                 }
             }
             DsDb {
-                name: match config.name { None => String::from("Unnamed DsDb"), Some(v) => v },
+                name: config.name,
                 description: config.description,
                 number: match config.number { None => 0, Some(v) => v },
                 offset: match config.offset { None => 0, Some(v) => v },

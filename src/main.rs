@@ -1,8 +1,5 @@
 #![allow(non_snake_case)]
 use std;
-use chrono::{DateTime, Duration, Utc};
-use std::collections::HashMap;
-use std::env;
 mod s7_client;
 mod ds_config;
 mod ds_line;
@@ -10,51 +7,10 @@ mod ds_ied;
 mod ds_db;
 mod ds_point;
 mod s7_parse_point;
-pub mod s7_client;
-
-use std;
 use std::env;
 use std::collections::HashMap;
 use ds_config::ds_config::DsConfig;
-use ds_db::ds_db::DsDb;
 use crate::ds_line::ds_line::DsLine;
-use crate::ds_ied::ds_ied::DsIed;
-use crate::s7_parse_point::s7_parse_point::{ParsePointType, S7ParsePointBool, S7ParsePointInt, S7ParsePointReal, ParsePoint};
-
-
-
-pub trait Point<T> {
-    fn convert(&self) -> T;
-}
-
-#[derive(Debug)]
-pub struct PointInt {
-    v: i16,
-}
-impl Point<i16> for PointInt {
-    fn convert(&self) -> i16 {
-        i16::from(16i16)
-    }
-}
-
-#[derive(Debug)]
-pub struct PointBool {
-    v: bool,
-}
-impl Point<bool> for PointBool {
-    fn convert(&self) -> bool {
-        bool::from(self.v)
-    }
-}
-
-#[derive(Debug)]
-enum PointConfVar {
-    PBool(PointBool),
-    PInt(PointInt),
-    // VecOfString(Vec<String>),
-    // AnotherHashMap(HashMap<&'a str, u32>),
-}
-
 
 fn main() {
     env::set_var("RUST_BACKTRACE", "1");
@@ -160,14 +116,14 @@ fn main() {
     //     conv = *convert["toStr"];
     // }
     // conv(0, "test");
-    let pBool = PointBool{v: true};
-    println!("pBool: {:#?}", &pBool);
-    let convertedBool = pBool.convert();
-    println!("convertedBool: {:#?}", convertedBool);
-    let pInt = PointInt{v: 166};
-    let convertedInt = pInt.convert();
-    println!("convertedInt: {:#?}", convertedInt);
-    println!("pInt: {:#?}", pInt);
+    // let pBool = PointBool{v: true};
+    // println!("pBool: {:#?}", &pBool);
+    // let convertedBool = pBool.convert();
+    // println!("convertedBool: {:#?}", convertedBool);
+    // let pInt = PointInt{v: 166};
+    // let convertedInt = pInt.convert();
+    // println!("convertedInt: {:#?}", convertedInt);
+    // println!("pInt: {:#?}", pInt);
     // loop {
     //     let t = Utc::now();
     //     let result = client.read(899, 0, 34);
