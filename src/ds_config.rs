@@ -28,11 +28,12 @@ pub mod ds_config {
     pub struct DsLineConf {
         // #[serde(flatten)]
         pub name: Option<String>,
+        pub description: Option<String>,
         pub ieds: Option<HashMap<String, DsIedConf>>,
     }
     
     #[serde_with::skip_serializing_none]
-    #[derive(Debug, Serialize, Deserialize)]
+    #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct DsIedConf {
         // #[serde(flatten)]
         pub name: String,
@@ -45,7 +46,7 @@ pub mod ds_config {
     
     #[serde_with::skip_serializing_none]
     // #[derive(Clone)]: #[derive(Clone)]
-    #[derive(Debug, Serialize, Deserialize)]
+    #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct DsDbConf {
         // #[serde(flatten)]
         pub name: String,

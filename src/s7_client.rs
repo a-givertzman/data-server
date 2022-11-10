@@ -1,9 +1,7 @@
-#![allow(non_snake_case)]
+// #[macro_use]
+// extern crate snap7_sys;
 
 pub mod s7_client {
-    // #[macro_use]
-    // extern crate snap7_sys;
-
     use snap7_sys::*;
     use std::ffi::CString;
     use std::os::raw::{
@@ -11,8 +9,8 @@ pub mod s7_client {
         c_char,
         c_void,
     };
-    
-    
+
+
     #[derive(Debug)]
     pub struct S7Client {
         ip: CString,
@@ -20,7 +18,6 @@ pub mod s7_client {
         req_len: usize,
         neg_len: usize,
     }
-    
     impl S7Client {
         pub fn new(ip: String) -> Self {
             Self {
@@ -53,7 +50,6 @@ pub mod s7_client {
                     size as c_int,
                     buf.as_mut_ptr() as *mut c_void
                 ) as i32;
-    
             }
             if res == 0 {
                 Ok(buf)
@@ -67,7 +63,6 @@ pub mod s7_client {
             }
         }
     }
-    
     impl Drop for S7Client {
         fn drop(&mut self) {
             self.close();
@@ -76,7 +71,6 @@ pub mod s7_client {
             }
         }
     }
-    
     pub fn error_text(code: i32) -> String {
         let mut err = Vec::<u8>::new();
         err.resize(1024, 0);
@@ -95,10 +89,9 @@ pub mod s7_client {
         };
         err.to_owned()
     }
-    
-    
-    // struct CtlRecord {
-    //     plc_counter: u64,
-    //     ctl_counter: u64,
-    // }
 }
+
+// struct CtlRecord {
+//     plc_counter: u64,
+//     ctl_counter: u64,
+// }
