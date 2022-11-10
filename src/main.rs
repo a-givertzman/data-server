@@ -1,5 +1,7 @@
 #![allow(non_snake_case)]
 use std;
+use std::env;
+use std::collections::HashMap;
 mod s7_client;
 mod ds_config;
 mod ds_line;
@@ -7,8 +9,6 @@ mod ds_ied;
 mod ds_db;
 mod ds_point;
 mod s7_parse_point;
-use std::env;
-use std::collections::HashMap;
 use ds_config::ds_config::DsConfig;
 use crate::ds_line::ds_line::DsLine;
 
