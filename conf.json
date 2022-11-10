@@ -10,7 +10,7 @@
                 "slot": 1,
                 "dbs": {
                     "db1": {
-                        "name": "DB1",
+                        "name": "DB 1.1.1",
                         "description": "db899",
                         "number": 899,
                         "offset": 0,
@@ -81,7 +81,12 @@
                 "slot": 1,
                 "dbs": {
                     "db1": {
-                        "name": "DB1",
+                        "name": "DB 1.2.1",
+                        "description": "db899",
+                        "number": 899,
+                        "offset": 0,
+                        "size": 34,
+                        "delay": 100,
                         "points": {
                             "point1.2.1": {
                                 "dataType": "Bool",
@@ -114,7 +119,12 @@
                 "slot": 1,
                 "dbs": {
                     "db1": {
-                        "name": "DB1",
+                        "name": "DB 2.1.1",
+                        "description": "db899",
+                        "number": 899,
+                        "offset": 0,
+                        "size": 34,
+                        "delay": 100,
                         "points": {
                             "point2.1.1": {
                                 "dataType": "Bool",
@@ -140,7 +150,12 @@
                 "slot": 1,
                 "dbs": {
                     "db1": {
-                        "name": "DB1",
+                        "name": "DB 2.2.1",
+                        "description": "db899",
+                        "number": 899,
+                        "offset": 0,
+                        "size": 34,
+                        "delay": 100,
                         "points": {
                             "point2.2.1": {
                                 "dataType": "Real",

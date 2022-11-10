@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 pub mod ds_db {
-    use std::{collections::HashMap};
+    use std::{collections::HashMap, thread::{self, JoinHandle}};
 
     use chrono::Utc;
 
@@ -13,12 +13,11 @@ pub mod ds_db {
 
     #[derive(Debug)]
     pub struct DsDb {
-        parsePoints: HashMap<String, ParsePointType, RandomState>,
         pub name: String,
         pub description: Option<String>,
-        pub number: Option<u32>,
-        pub offset: Option<u32>,
-        pub size: Option<u32>,
+        pub number: u32,
+        pub offset: u32,
+        pub size: u32,
         pub delay: u32,
         pub points: Option<HashMap<String, DsPointConf>>,
         localPoints: HashMap<String, ParsePointType>,
@@ -76,12 +75,11 @@ pub mod ds_db {
                 }
             }
             DsDb {
-                parsePoints: HashMap::new(),
-                name: config.name,
+                name: match config.name { None => String::from("Unnamed DsDb"), Some(v) => v },
                 description: config.description,
-                number: config.number,
-                offset: config.offset,
-                size: config.size,
+                number: match config.number { None => 0, Some(v) => v },
+                offset: match config.offset { None => 0, Some(v) => v },
+                size: match config.size { None => 0, Some(v) => v },
                 delay: match config.delay { None => 0, Some(v) => v },
                 points: config.points,  // Some(localPoints),
                 localPoints: dbPoints,
@@ -89,38 +87,54 @@ pub mod ds_db {
     
         }
         ///
+        fn read() {
+
+        }
+        ///
         pub fn start(&mut self, client: S7Client) {
-            loop {
-                let t = Utc::now();
-                let result = client.read(899, 0, 34);
-                match result {
-                    Err(err) => println!("client.read error: {}", err),
-                    Ok(bytes) => {
-                        // let bytes = client.read(899, 0, 34).unwrap();
-                        // print!("\x1B[2J\x1B[1;1H");
-                        println!("{:#?}", bytes);
-                        for (key, pointType) in &self.localPoints {
-                            match pointType.clone() {
-                                ParsePointType::Bool(mut point) => {
-                                    point.addRaw(&bytes);
-                                    println!("point Bool: {:#?}", point);
-                                },
-                                ParsePointType::Int(mut point) => {
-                                    point.addRaw(&bytes);
-                                    println!("point Int: {:#?}", point);
-                                },
-                                ParsePointType::Real(mut point) => {
-                                    point.addRaw(&bytes);
-                                    println!("point Real: {:#?}", point);
-                                },
-                            }
+            // let h = &mut self.handle;
+            thread::scope(|s| {
+                s.spawn(move || {
+                    loop {
+                        let t = Utc::now();
+                        let result = client.read(self.number, self.offset, self.size);
+                        match result {
+                            Err(err) => println!("client.read error: {}", err),
+                            Ok(bytes) => {
+                                // let bytes = client.read(899, 0, 34).unwrap();
+                                // print!("\x1B[2J\x1B[1;1H");
+                                // println!("{:#?}", bytes);
+                                for (key, pointType) in &self.localPoints {
+                                    match pointType.clone() {
+                                        ParsePointType::Bool(mut point) => {
+                                            point.addRaw(&bytes);
+                                            println!("point Bool: {:#?}", point);
+                                        },
+                                        ParsePointType::Int(mut point) => {
+                                            point.addRaw(&bytes);
+                                            println!("point Int: {:#?}", point);
+                                        },
+                                        ParsePointType::Real(mut point) => {
+                                            point.addRaw(&bytes);
+                                            println!("point Real: {:#?}", point);
+                                        },
+                                    }
+                                }
+                            }        
                         }
-                    }        
-                }
-                let dt = Utc::now() - t;
-                println!("{:#?} elapsed: {:?}sec {:?}ms",self.name , dt.num_seconds(), dt.num_milliseconds());
-                std::thread::sleep(std::time::Duration::from_millis(self.delay as u64));
-            }
+                        let dt = Utc::now() - t;
+                        println!("{:#?} elapsed: {:?}sec {:?}ms",self.name , dt.num_seconds(), dt.num_milliseconds());
+                        std::thread::sleep(std::time::Duration::from_millis(self.delay as u64));
+                    }
+                });
+            }); 
+        }
+        ///
+        pub fn join(&mut self) {
+            // match &mut self.handle {
+            //     None => (),
+            //     Some(handle) => *handle.join().unwrap(),
+            // }
         }
     }
 }

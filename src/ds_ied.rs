@@ -23,7 +23,7 @@ pub mod ds_ied {
         pub fn new(
             config: DsIedConf,
         ) -> DsIed {
-            let path = config.name.clone().unwrap();
+            let path = match config.name.clone() { None => String::from("Unnamed DsIed"), Some(v) => v };
             let mut dbs: HashMap<String, DsDb> = HashMap::new();
             match config.dbs.clone() {
                 None => (),
@@ -56,6 +56,9 @@ pub mod ds_ied {
                 client.connect();
                 println!("client: {:#?}", client);
                 db.start(client);
+            }
+            for (key, db) in &mut self.dbs {
+                db.join();
             }
         }
     }
