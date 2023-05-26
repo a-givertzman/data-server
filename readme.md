@@ -3,9 +3,10 @@
 Server application written on rust for linux os.
 
 Multithread application handles events coming from subordinated devices over industrial protocols (Profinet, Modbus, IEC 60870-5-104) over tcp connections.
-    - [x] Profinet
-    - [ ] Modbus TCP
-    - [ ] IEC 60870-5-104
+
+- [x] Profinet
+- [ ] Modbus TCP
+- [ ] IEC 60870-5-104
 
 ## installation
 
