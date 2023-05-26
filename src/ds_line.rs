@@ -2,7 +2,9 @@
 
 pub mod ds_line {
     use std::{collections::HashMap};
-
+    use log::{
+        debug,
+    };
     use crate::{
         ds_config::ds_config::{DsLineConf}, 
         ds_ied::ds_ied::DsIed,
@@ -19,14 +21,14 @@ pub mod ds_line {
         pub fn new(
             config: DsLineConf,
         ) -> DsLine {
-            let path = config.name.clone().unwrap();
+            let _path = config.name.clone().unwrap();
             let mut ieds: HashMap<String, DsIed> = HashMap::new();
             match config.ieds.clone() {
                 None => (),
                 Some(confIeds) => {
                     for (iedKey, iedConf) in confIeds {
                         let ied = DsIed::new(iedConf);
-                        println!("\t\tdb {:?}: {:?}", iedKey, ied);
+                        // debug!("\t\tdb {:?}: {:?}", iedKey, ied);
                         ieds.insert(
                             iedKey,
                             ied,
@@ -43,7 +45,7 @@ pub mod ds_line {
         }
         ///
         pub fn start(&mut self) {
-            for (key, ied) in &mut self.ieds {
+            for (_key, ied) in &mut self.ieds {
                 ied.start();
             }
         }

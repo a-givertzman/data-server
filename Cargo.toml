@@ -15,3 +15,4 @@ snap7-sys = "^0.1.4"
 libc = "^0.2"
 bindgen = "^0.51"
 log = { version = "^0.4", features = ["std", "serde"] }
+env_logger = "^0.10"

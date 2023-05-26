@@ -14,7 +14,12 @@
 pub mod s7_parse_point {
     use std::array::TryFromSliceError;
 
-    use log::{debug, error, info, warn};
+    use log::{
+        // info, 
+        // debug, 
+        warn,
+        error, 
+    };
 
     use crate::{ds_config::ds_config::{DsPointConf}};
 
@@ -150,7 +155,7 @@ pub mod s7_parse_point {
                 }
             }
         }
-        fn convert(&self, bytes: &Vec<u8>, start: usize, bit: usize) -> Result<i16, TryFromSliceError> {
+        fn convert(&self, bytes: &Vec<u8>, start: usize, _bit: usize) -> Result<i16, TryFromSliceError> {
             match bytes[start..(start + 2)].try_into() {
                 Ok(v) => Ok(i16::from_be_bytes(v)),
                 Err(e) => {
@@ -215,7 +220,7 @@ pub mod s7_parse_point {
             }
         }
         ///
-        fn convert(&self, bytes: &Vec<u8>, start: usize, bit: usize) -> Result<f32, TryFromSliceError> {
+        fn convert(&self, bytes: &Vec<u8>, start: usize, _bit: usize) -> Result<f32, TryFromSliceError> {
             match bytes[start..(start + 4)].try_into() {
                 Ok(v) => Ok(f32::from_be_bytes(v)),
                 Err(e) => {

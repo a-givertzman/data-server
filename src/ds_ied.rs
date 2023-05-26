@@ -1,8 +1,12 @@
 #![allow(non_snake_case)]
 
 pub mod ds_ied {
-    use std::{collections::HashMap};
-
+    use std::{collections::HashMap, sync::{Arc, Mutex}};
+    use log::{
+        // info,
+        debug,
+        // error,
+    };
     use crate::{
         ds_config::ds_config::{DsIedConf}, 
         ds_db::ds_db::DsDb,
@@ -16,21 +20,21 @@ pub mod ds_ied {
         pub ip: String,
         pub rack: u32,
         pub slot: u32,
-        pub dbs: HashMap<String, DsDb>,
+        pub dbs: HashMap<String, Arc<Mutex<DsDb>>>,
     }
     impl DsIed {
         ///
         pub fn new(
             config: DsIedConf,
         ) -> DsIed {
-            let path = config.name.clone();
-            let mut dbs: HashMap<String, DsDb> = HashMap::new();
+            let _path = config.name.clone();
+            let mut dbs: HashMap<String, Arc<Mutex<DsDb>>> = HashMap::new();
             match config.dbs.clone() {
                 None => (),
                 Some(confDbs) => {
                     for (dbKey, dbConf) in confDbs {
-                        let db = DsDb::new(dbConf);
-                        println!("\t\tdb {:?}: {:#?}", dbKey, db);
+                        let db = Arc::new(Mutex::new(DsDb::new(dbConf)));
+                        // debug!("\t\tdb {:?}: {:#?}", dbKey, db);
                         dbs.insert(
                             dbKey, 
                             db,
@@ -50,15 +54,12 @@ pub mod ds_ied {
         }
         ///
         pub fn start(&mut self) {
-            for (key, db) in &mut self.dbs {
+            for (_key, db) in &self.dbs {
                 let mut client = S7Client::new(self.ip.clone());
-                println!("client: {:#?}", client);
+                debug!("client: {:#?}", client);
                 client.connect();
-                println!("client: {:#?}", client);
-                db.start(client);
-            }
-            for (key, db) in &mut self.dbs {
-                db.join();
+                debug!("client: {:#?}", client);
+                DsDb::start(db.clone(), client);
             }
         }
     }
