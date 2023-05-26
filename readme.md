@@ -19,3 +19,11 @@ cd snap7-full-1.4.2/build/unix
 ```bash
 sudo make -f x86_64_linux.mk all install LibInstall=/usr/lib
 ```
+
+## run
+
+```bash
+git clone https://github.com/a-givertzman/data-server.git
+cd data-server
+cargo run --release
+```
