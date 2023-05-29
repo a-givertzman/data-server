@@ -4,6 +4,7 @@ pub mod ds_db {
     use std::{collections::HashMap, thread::{self, JoinHandle}, sync::{Arc, Mutex}, any::Any, time::Instant};
 
     use chrono::Utc;
+    use concurrent_queue::ConcurrentQueue;
     use log::{
         info,
         debug,
@@ -13,8 +14,10 @@ pub mod ds_db {
     use crate::{
         ds_config::ds_config::{DsDbConf, DsPointConf}, 
         s7_parse_point::s7_parse_point::{ParsePoint, ParsePointType, S7ParsePointBool, S7ParsePointInt, S7ParsePointReal}, 
-        s7_client::s7_client::S7Client
+        s7_client::s7_client::S7Client, ds_point::ds_point::DsPoint
     };
+
+    pub(crate) const MAX_QUEUE_SIZE: usize = 1024 * 16;
 
     #[derive(Debug)]
     pub struct DsDb {
@@ -28,6 +31,8 @@ pub mod ds_db {
         localPoints: HashMap<String, ParsePointType>,
         handle: Option<JoinHandle<()>>,
         cancel: bool,
+        // sender: Arc<ConcurrentQueue<DsPoint>>,
+        // pub receiver: Arc<ConcurrentQueue<DsPoint>>,        
     }
     impl DsDb {
         ///
@@ -81,6 +86,7 @@ pub mod ds_db {
                     }
                 }
             }
+            // let sender = Arc::new(ConcurrentQueue::bounded(MAX_QUEUE_SIZE)); 
             DsDb {
                 name: config.name,
                 description: config.description,
@@ -92,6 +98,8 @@ pub mod ds_db {
                 localPoints: dbPoints,
                 handle: None,
                 cancel: false,
+                // sender: sender.clone(),
+                // receiver: sender,                
             }
     
         }
@@ -108,9 +116,9 @@ pub mod ds_db {
             let me1 = this.clone();
             let delay = this.clone().lock().unwrap().delay as u64;
             let handle = thread::Builder::new().name("DsDb.thread".to_string()).spawn(move || {
-                let me = me.lock().unwrap();
-                let cancel = me.cancel;
-                while !cancel {
+                // let sender = me.clone().lock().unwrap().sender.clone();
+                while !me.clone().lock().unwrap().cancel {
+                    let me = me.lock().unwrap();
                     let t = Instant::now();
                     // let t = Utc::now();
                     if client.isConnected {
@@ -125,6 +133,10 @@ pub mod ds_db {
                                         ParsePointType::Bool(mut point) => {
                                             point.addRaw(&bytes);
                                             debug!("{} point Bool: {:#?}", logPref, point);
+                                            if point.isChanged() {
+                                                // let dsPoint = DsPoint::new(point.name, point.path, config)
+                                                // sender.push(value)
+                                            }
                                         },
                                         ParsePointType::Int(mut point) => {
                                             point.addRaw(&bytes);
@@ -146,11 +158,13 @@ pub mod ds_db {
 
                     }
                     let dt = Instant::now() - t;
-                    debug!("{} {:#?} elapsed: {:?} ({:?})", logPref, me.name , dt, dt.as_millis());
+                    // debug!("{} {:#?} elapsed: {:?} ({:?})", logPref, me.name , dt, dt.as_millis());
                     let wait: i128 = (delay as i128) - (dt.as_millis() as i128);
                     if wait > 0 {
                         std::thread::sleep(std::time::Duration::from_millis(wait as u64));
                     }
+                    let dt = Instant::now() - t;
+                    debug!("{} {:#?} elapsed: {:?} ({:?})", logPref, me.name , dt, dt.as_millis());
                 }
                 info!("{} exit", logPref);
             }).unwrap();

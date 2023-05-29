@@ -26,12 +26,14 @@ pub mod s7_parse_point {
     pub trait ParsePoint<T> {
         fn addRaw(&mut self, bytes: &Vec<u8>);
         fn convert(&self, bytes: &Vec<u8>, start: usize, bit: usize) -> Result<T, TryFromSliceError>;
+        fn isChanged(&self) -> bool;
     }
     
     
     #[derive(Debug, Clone)]
     pub struct S7ParsePointBool {
         value: bool,
+        isChanged: bool,
         pub path: String,
         pub name: String,
         pub dataType: Option<String>,
@@ -53,6 +55,7 @@ pub mod s7_parse_point {
         ) -> S7ParsePointBool {
             S7ParsePointBool {
                 value: false,
+                isChanged: false,
                 path: path,
                 name: name,
                 dataType: config.dataType,
@@ -74,6 +77,7 @@ pub mod s7_parse_point {
                 Ok(newVal) => {
                     if newVal != self.value {
                         self.value = newVal;
+                        self.isChanged = true;
                     }        
                 },
                 Err(e) => {
@@ -95,6 +99,11 @@ pub mod s7_parse_point {
                 }
             }
         }
+        ///
+        /// returns true if value of point wath updated
+        fn isChanged(&self) -> bool {
+            self.isChanged
+        }
     }
 
     ///
@@ -107,6 +116,7 @@ pub mod s7_parse_point {
     #[derive(Debug, Clone)]
     pub struct S7ParsePointInt {
         value: i16,
+        isChanged: bool,
         pub path: String,
         pub name: String,
         pub dataType: Option<String>,
@@ -129,6 +139,7 @@ pub mod s7_parse_point {
         ) -> S7ParsePointInt {
             S7ParsePointInt {
                 value: 0,
+                isChanged: false,
                 path: path,
                 name: name,
                 dataType: config.dataType,
@@ -142,6 +153,7 @@ pub mod s7_parse_point {
         }
     }
     impl ParsePoint<i16> for S7ParsePointInt {
+        ///
         fn addRaw(&mut self, bytes: &Vec<u8>) {
             let result = self.convert(bytes, self.offset.unwrap() as usize, 0);
             match result {
@@ -155,6 +167,7 @@ pub mod s7_parse_point {
                 }
             }
         }
+        ///
         fn convert(&self, bytes: &Vec<u8>, start: usize, _bit: usize) -> Result<i16, TryFromSliceError> {
             match bytes[start..(start + 2)].try_into() {
                 Ok(v) => Ok(i16::from_be_bytes(v)),
@@ -164,11 +177,17 @@ pub mod s7_parse_point {
                 }
             }
         }
+        ///
+        /// returns true if value of point wath updated
+        fn isChanged(&self) -> bool {
+            self.isChanged
+        }
     }
     ///
     #[derive(Debug, Clone)]
     pub struct S7ParsePointReal {
         value: f32,
+        isChanged: bool,
         pub path: String,
         pub name: String,
         pub dataType: Option<String>,
@@ -192,6 +211,7 @@ pub mod s7_parse_point {
         ) -> S7ParsePointReal {
             S7ParsePointReal {
                 value: 0.0,
+                isChanged: false,
                 path: path,
                 name: name,
                 dataType: config.dataType,
@@ -228,6 +248,11 @@ pub mod s7_parse_point {
                     Err(e)
                 }
             }
+        }
+        ///
+        /// returns true if value of point wath updated
+        fn isChanged(&self) -> bool {
+            self.isChanged
         }        
     }
     ///

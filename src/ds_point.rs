@@ -1,30 +1,34 @@
 #![allow(non_snake_case)]
 
 pub mod ds_point {
+    use chrono::{DateTime, Utc};
+
     use crate::ds_config::ds_config::DsPointConf;
 
     #[derive(Debug)]
-    pub struct DsPoint {
+    pub struct DsPoint<T> {
         pub name: String,
-        pub path: String,
         pub dataType: Option<String>,
-        pub offset: Option<u32>,
-        pub comment: Option<String>,
-        pub vrt: Option<u8>,
+        pub value: T,
+        history: u8,
+        alarm: u8,
+        pub timestamp: DateTime<Utc>,
     }
-    impl DsPoint {
+
+
+
+    impl DsPoint<bool> {
         pub fn new(
             name: String,
-            path: String,
             config: DsPointConf,
-        ) -> DsPoint {
+        ) -> DsPoint<bool> {
             DsPoint {
                 name: name,
-                path: path,
                 dataType: config.dataType,
-                offset: config.offset,
-                vrt: config.vrt,
-                comment: config.comment,
+                value: todo!(),
+                history: todo!(),
+                alarm: todo!(),
+                timestamp: todo!(),
             }
     
         }
