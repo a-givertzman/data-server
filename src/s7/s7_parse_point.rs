@@ -2,6 +2,7 @@
 
 use std::array::TryFromSliceError;
 
+use chrono::{DateTime, Utc};
 use log::{
     // info, 
     // debug, 
@@ -44,6 +45,7 @@ pub struct S7ParsePointBool {
     pub h: Option<u8>,
     pub a: Option<u8>,
     pub comment: Option<String>,
+    pub timestamp: DateTime<Utc>,
 }
 impl S7ParsePointBool {
     pub fn new(
@@ -66,6 +68,7 @@ impl S7ParsePointBool {
             h: config.h,
             a: config.a,
             comment: config.comment,
+            timestamp: Utc::now(),
         }
     }
 }
@@ -73,11 +76,13 @@ impl S7ParsePointBool {
 impl ParsePoint<bool> for S7ParsePointBool {
     ///
     fn addRaw(&mut self, bytes: &Vec<u8>) {
+        let timestamp = Utc::now();
         let result = self.convert(bytes, self.offset.unwrap() as usize, self.bit.unwrap() as usize);
         match result {
             Ok(newVal) => {
                 if newVal != self.value {
                     self.value = newVal;
+                    self.timestamp = timestamp;
                     self.isChanged = true;
                 }        
             },
@@ -127,6 +132,7 @@ pub struct S7ParsePointInt {
     pub h: Option<u8>,
     pub a: Option<u8>,
     pub comment: Option<String>,
+    pub timestamp: DateTime<Utc>,
 }
 ///
 impl S7ParsePointInt {
@@ -150,17 +156,21 @@ impl S7ParsePointInt {
             h: config.h,
             a: config.a,
             comment: config.comment,
+            timestamp: Utc::now(),
         }
     }
 }
 impl ParsePoint<i16> for S7ParsePointInt {
     ///
     fn addRaw(&mut self, bytes: &Vec<u8>) {
+        let timestamp = Utc::now();
         let result = self.convert(bytes, self.offset.unwrap() as usize, 0);
         match result {
             Ok(newVal) => {
                 if newVal != self.value {
                     self.value = newVal;
+                    self.timestamp = timestamp;
+                    self.isChanged = true;
                 }        
             },
             Err(e) => {
@@ -198,6 +208,7 @@ pub struct S7ParsePointReal {
     pub h: Option<u8>,
     pub a: Option<u8>,
     pub comment: Option<String>,
+    pub timestamp: DateTime<Utc>,
 }
 ///
 impl S7ParsePointReal {
@@ -222,17 +233,21 @@ impl S7ParsePointReal {
             h: config.h,
             a: config.a,
             comment: config.comment,
+            timestamp: Utc::now(),
         }
     }
 }
 impl ParsePoint<f32> for S7ParsePointReal {
     ///
     fn addRaw(&mut self, bytes: &Vec<u8>) {
+        let timestamp = Utc::now();
         let result = self.convert(bytes, self.offset.unwrap() as usize, 0);
         match result {
             Ok(newVal) => {
                 if newVal != self.value {
                     self.value = newVal;
+                    self.timestamp = timestamp;
+                    self.isChanged = true;
                 }        
             },
             Err(e) => {

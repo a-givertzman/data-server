@@ -1,4 +1,8 @@
 #![allow(non_snake_case)]
+#[cfg(test)]
+mod tests;
+
+
 mod s7;
 mod ds;
 use std;

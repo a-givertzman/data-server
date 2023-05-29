@@ -12,7 +12,7 @@ use log::{
 
 use crate::ds::{
     ds_config::{DsDbConf, DsPointConf}, 
-    ds_point::DsPoint,
+    ds_point::DsPoint, ds_status::DsStatus,
 };
 use crate::s7::{
     s7_client::S7Client,
@@ -133,19 +133,51 @@ impl DsDb {
                                 match pointType.clone() {
                                     ParsePointType::Bool(mut point) => {
                                         point.addRaw(&bytes);
-                                        debug!("{} point Bool: {:#?}", logPref, point);
+                                        debug!("{} parsed point Bool: {:#?}", logPref, point);
                                         if point.isChanged() {
-                                            // let dsPoint = DsPoint::new(point.name, point.path, )
+                                            let dsPoint = DsPoint::<bool>::new(
+                                                point.name.as_str(),
+                                                false,
+                                                DsStatus::Ok,
+                                                0,
+                                                0,
+                                                point.timestamp,
+                                            );
                                             // sender.push(value)
+                                            debug!("{} point Bool: {:#?}", logPref, point);
                                         }
                                     },
                                     ParsePointType::Int(mut point) => {
                                         point.addRaw(&bytes);
-                                        debug!("{} point Int: {:#?}", logPref, point);
+                                        debug!("{} parsed point Int: {:#?}", logPref, point);
+                                        if point.isChanged() {
+                                            let dsPoint = DsPoint::<i16>::new(
+                                                point.name.as_str(),
+                                                0,
+                                                DsStatus::Ok,
+                                                0,
+                                                0,
+                                                point.timestamp,
+                                            );
+                                            // sender.push(value)
+                                            debug!("{} point Int: {:#?}", logPref, point);
+                                        }
                                     },
                                     ParsePointType::Real(mut point) => {
                                         point.addRaw(&bytes);
-                                        debug!("{} point Real: {:#?}", logPref, point);
+                                        // debug!("{} parsed point Real: {:#?}", logPref, point);
+                                        if point.isChanged() {
+                                            let dsPoint = DsPoint::<f32>::new(
+                                                point.name.as_str(),
+                                                0.0,
+                                                DsStatus::Ok,
+                                                0,
+                                                0,
+                                                point.timestamp,
+                                            );
+                                            debug!("{} point Real: {:#?}", logPref, point);
+                                        // sender.push(value)
+                                        }
                                     },
                                 }
                             }
