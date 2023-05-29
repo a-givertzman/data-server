@@ -44,9 +44,9 @@ pub mod ds_line {
     
         }
         ///
-        pub fn start(&mut self) {
+        pub fn run(&mut self) {
             for (_key, ied) in &mut self.ieds {
-                ied.start();
+                ied.run();
             }
         }
     }

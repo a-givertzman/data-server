@@ -53,13 +53,17 @@ pub mod ds_ied {
     
         }
         ///
-        pub fn start(&mut self) {
+        pub fn run(&mut self) {
+            const logPref: &str = "[DsIed.run]";
             for (_key, db) in &self.dbs {
-                let mut client = S7Client::new(self.ip.clone());
-                debug!("client: {:#?}", client);
+                let mut client = S7Client::new(
+                    self.ip.clone(),
+                    None,
+                );
+                // debug!("{} client: {:#?}", logPref, client);
                 client.connect();
-                debug!("client: {:#?}", client);
-                DsDb::start(db.clone(), client);
+                // debug!("{} client: {:#?}", logPref, client);
+                DsDb::run(db.clone(), client);
             }
         }
     }

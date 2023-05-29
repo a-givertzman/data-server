@@ -9,6 +9,7 @@ mod ds_ied;
 mod ds_db;
 mod ds_point;
 mod s7_parse_point;
+mod interval;
 use ds_config::ds_config::DsConfig;
 use log::{
     info,
@@ -28,7 +29,7 @@ fn main() {
     for (lineKey, lineConf) in config.lines {
         debug!("{} line {:?}: ", logPref, lineKey);
         let mut line = DsLine::new(lineConf);
-        line.start();
+        line.run();
         lines.insert(
             lineKey, 
             line,

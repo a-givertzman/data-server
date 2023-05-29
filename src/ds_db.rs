@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 pub mod ds_db {
-    use std::{collections::HashMap, thread::{self, JoinHandle}, sync::{Arc, Mutex}, any::Any};
+    use std::{collections::HashMap, thread::{self, JoinHandle}, sync::{Arc, Mutex}, any::Any, time::Instant};
 
     use chrono::Utc;
     use log::{
@@ -13,7 +13,7 @@ pub mod ds_db {
     use crate::{
         ds_config::ds_config::{DsDbConf, DsPointConf}, 
         s7_parse_point::s7_parse_point::{ParsePoint, ParsePointType, S7ParsePointBool, S7ParsePointInt, S7ParsePointReal}, 
-        s7_client::s7_client::S7Client
+        s7_client::s7_client::S7Client, interval::Interval
     };
 
     #[derive(Debug)]
@@ -100,47 +100,57 @@ pub mod ds_db {
 
         // }
         ///
-        pub fn start(this: Arc<Mutex<Self>>, client: S7Client) {
-            const logPref: &str = "[DsDb.start]";
+        pub fn run(this: Arc<Mutex<Self>>, client: S7Client) {
+            const logPref: &str = "[DsDb.run]";
             info!("{} starting in thread: {:?}...", logPref, thread::current().name().unwrap());
             // let h = &mut self.handle;
             let me = this.clone();
             let me1 = this.clone();
+            let delay = this.clone().lock().unwrap().delay as u64;
             let handle = thread::Builder::new().name("DsDb.thread".to_string()).spawn(move || {
                 let me = me.lock().unwrap();
                 let cancel = me.cancel;
                 while !cancel {
-                    let t = Utc::now();
-                    match client.read(me.number, me.offset, me.size) {
-                        Ok(bytes) => {
-                            // let bytes = client.read(899, 0, 34).unwrap();
-                            // print!("\x1B[2J\x1B[1;1H");
-                            // debug!("{:#?}", bytes);
-                            for (_key, pointType) in &me.localPoints {
-                                match pointType.clone() {
-                                    ParsePointType::Bool(mut point) => {
-                                        point.addRaw(&bytes);
-                                        debug!("{} point Bool: {:#?}", logPref, point);
-                                    },
-                                    ParsePointType::Int(mut point) => {
-                                        point.addRaw(&bytes);
-                                        debug!("{} point Int: {:#?}", logPref, point);
-                                    },
-                                    ParsePointType::Real(mut point) => {
-                                        point.addRaw(&bytes);
-                                        debug!("{} point Real: {:#?}", logPref, point);
-                                    },
+                    let t = Instant::now();
+                    // let t = Utc::now();
+                    if client.isConnected {
+                        debug!("{} reading DB: {:?}, offset: {:?}, size: {:?}", logPref, me.number, me.offset, me.size);
+                        match client.read(me.number, me.offset, me.size) {
+                            Ok(bytes) => {
+                                // let bytes = client.read(899, 0, 34).unwrap();
+                                // print!("\x1B[2J\x1B[1;1H");
+                                // debug!("{:#?}", bytes);
+                                for (_key, pointType) in &me.localPoints {
+                                    match pointType.clone() {
+                                        ParsePointType::Bool(mut point) => {
+                                            point.addRaw(&bytes);
+                                            debug!("{} point Bool: {:#?}", logPref, point);
+                                        },
+                                        ParsePointType::Int(mut point) => {
+                                            point.addRaw(&bytes);
+                                            debug!("{} point Int: {:#?}", logPref, point);
+                                        },
+                                        ParsePointType::Real(mut point) => {
+                                            point.addRaw(&bytes);
+                                            debug!("{} point Real: {:#?}", logPref, point);
+                                        },
+                                    }
                                 }
-                            }
-                        }        
-                        Err(err) => {
-                            error!("{} client.read error: {}", logPref, err);
-                            std::thread::sleep(std::time::Duration::from_millis(me.delay as u64));
-                        },
+                            }        
+                            Err(err) => {
+                                error!("{} client.read error: {}", logPref, err);
+                                std::thread::sleep(std::time::Duration::from_millis((delay * 100) as u64));
+                            },
+                        }
+                    } else {
+
                     }
-                    let dt = Utc::now() - t;
-                    debug!("{} {:#?} elapsed: {:?}sec {:?}ms", logPref, me.name , dt.num_seconds(), dt.num_milliseconds());
-                    std::thread::sleep(std::time::Duration::from_millis(me.delay as u64));
+                    let dt = Instant::now() - t;
+                    debug!("{} {:#?} elapsed: {:?} ({:?})", logPref, me.name , dt, dt.as_millis());
+                    let wait: i128 = (delay as i128) - (dt.as_millis() as i128);
+                    if wait > 0 {
+                        std::thread::sleep(std::time::Duration::from_millis(wait as u64));
+                    }
                 }
                 info!("{} exit", logPref);
             }).unwrap();

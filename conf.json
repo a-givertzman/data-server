@@ -2,170 +2,25 @@
     "line1": {
         "name": "Line 1",
         "ieds": {
-            "ied1.1": {
-                "name": "Ied 1.1",
-                "description": "S7-IED-01.01",
-                "ip": "192.168.120.243",
+            "exhibitionSiprotec": {
+                "name": "Siprotec",
+                "description": "S7-IED-EXHIBIT",
+                "ip": "192.168.120.141",
                 "rack": 0,
                 "slot": 1,
                 "dbs": {
-                    "db1": {
-                        "name": "DB 1.1.1",
-                        "description": "db899",
-                        "number": 899,
+                    "db69": {
+                        "name": "DB 69",
+                        "description": "db69",
+                        "number": 69,
                         "offset": 0,
-                        "size": 34,
+                        "size": 4,
                         "delay": 10,
                         "points": {
                             "Drive.Speed": {
                                 "dataType": "Real",
                                 "comment": "Drive.Speed",
                                 "offset": 0
-                            },
-                            "Drive.OutputVoltage": {
-                                "dataType": "Real",
-                                "comment": "Drive.OutputVoltage",
-                                "offset": 4
-                            },
-                            "Drive.DCVoltage": {
-                                "dataType": "Real",
-                                "comment": "Drive.DCVoltage",
-                                "offset": 8
-                            },
-                            "Drive.Current": {
-                                "dataType": "Real",
-                                "comment": "Drive.Current",
-                                "offset": 12
-                            },
-                            "Drive.Torque": {
-                                "dataType": "Real",
-                                "comment": "Drive.Torque",
-                                "offset": 16
-                            },
-                            "Drive.positionFromMru": {
-                                "dataType": "Real",
-                                "comment": "Drive.positionFromMru",
-                                "offset": 20
-                            },
-                            "Drive.positionFromHoist": {
-                                "dataType": "Real",
-                                "comment": "Point 1.1.2Drive.positionFromHoist",
-                                "offset": 24
-                            },
-                            "Capacitor.Capacity": {
-                                "dataType": "Real",
-                                "comment": "Capacitor.Capacity",
-                                "offset": 28
-                            },
-                            "ChargeIn.On": {
-                                "dataType": "Bool",
-                                "comment": "ChargeIn.On",
-                                "offset": 30,
-                                "bit": 0
-                            },
-                            "ChargeOut.On": {
-                                "dataType": "Bool",
-                                "comment": "ChargeOut.On",
-                                "offset": 32,
-                                "bit": 0
-                            }
-                        }
-                    }
-                }
-            },
-            "ied1.2": {
-                "name": "Ied 1.2",
-                "description": "S7-IED-01.01",
-                "ip": "192.168.120.243",
-                "rack": 0,
-                "slot": 1,
-                "dbs": {
-                    "db1": {
-                        "name": "DB 1.2.1",
-                        "description": "db899",
-                        "number": 899,
-                        "offset": 0,
-                        "size": 34,
-                        "delay": 100,
-                        "points": {
-                            "point1.2.1": {
-                                "dataType": "Bool",
-                                "comment": "Point 1.2.1",
-                                "offset": 2,
-                                "bit": 0,
-                                "vrt": 1
-                            },
-                            "point1.2.2": {
-                                "dataType": "Bool",
-                                "comment": "Point 1.2.1",
-                                "offset": 2,
-                                "bit": 1,
-                                "vrt": 1
-                            }
-                        }    
-                    }
-                }
-            }
-        }
-    },
-    "line2": {
-        "name": "Line 2",
-        "ieds": {
-            "ied2.1": {
-                "name": "Ied 2.1",
-                "description": "S7-IED-01.01",
-                "ip": "192.168.120.243",
-                "rack": 0,
-                "slot": 1,
-                "dbs": {
-                    "db1": {
-                        "name": "DB 2.1.1",
-                        "description": "db899",
-                        "number": 899,
-                        "offset": 0,
-                        "size": 34,
-                        "delay": 100,
-                        "points": {
-                            "point2.1.1": {
-                                "dataType": "Bool",
-                                "comment": "Point 2.1.1",
-                                "offset": 2,
-                                "bit": 0
-                            },
-                            "point2.1.2": {
-                                "dataType": "Bool",
-                                "comment": "Point 2.1.2",
-                                "offset": 2,
-                                "bit": 1
-                            }            
-                        }
-                    }
-                }
-            },
-            "ied2.2": {
-                "name": "Ied 2.2",
-                "description": "S7-IED-01.01",
-                "ip": "192.168.120.243",
-                "rack": 0,
-                "slot": 1,
-                "dbs": {
-                    "db1": {
-                        "name": "DB 2.2.1",
-                        "description": "db899",
-                        "number": 899,
-                        "offset": 0,
-                        "size": 34,
-                        "delay": 100,
-                        "points": {
-                            "point2.2.1": {
-                                "dataType": "Real",
-                                "comment": "Point 2.2.1",
-                                "offset": 2
-                            },
-                            "point2.2.2": {
-                                "dataType": "Real",
-                                "comment": "Point 2.2.2",
-                                "offset": 6
                             }
                         }
                     }
