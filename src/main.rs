@@ -1,20 +1,17 @@
 #![allow(non_snake_case)]
+mod s7;
+mod ds;
 use std;
 use std::env;
 use std::collections::HashMap;
-mod s7_client;
-mod ds_config;
-mod ds_line;
-mod ds_ied;
-mod ds_db;
-mod ds_point;
-mod s7_parse_point;
-use ds_config::ds_config::DsConfig;
+use ds::{
+    ds_config::DsConfig,
+    ds_line::DsLine,
+};
 use log::{
     info,
     debug,
 };
-use crate::ds_line::ds_line::DsLine;
 
 fn main() {
     const logPref: &str = "[main]";
