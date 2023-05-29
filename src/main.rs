@@ -9,7 +9,6 @@ mod ds_ied;
 mod ds_db;
 mod ds_point;
 mod s7_parse_point;
-mod interval;
 use ds_config::ds_config::DsConfig;
 use log::{
     info,

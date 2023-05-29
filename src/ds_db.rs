@@ -13,7 +13,7 @@ pub mod ds_db {
     use crate::{
         ds_config::ds_config::{DsDbConf, DsPointConf}, 
         s7_parse_point::s7_parse_point::{ParsePoint, ParsePointType, S7ParsePointBool, S7ParsePointInt, S7ParsePointReal}, 
-        s7_client::s7_client::S7Client, interval::Interval
+        s7_client::s7_client::S7Client
     };
 
     #[derive(Debug)]
