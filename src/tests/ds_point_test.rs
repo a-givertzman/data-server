@@ -1,7 +1,6 @@
 #![allow(non_upper_case_globals)]
-#[cfg(test)]
+#![cfg(test)]
 
-use std::env;
 use log::{
     info, 
     debug, 
@@ -13,13 +12,17 @@ use chrono::{Utc};
 use concurrent_queue::ConcurrentQueue;
 use rand::Rng;
 
-use crate::ds::{
-    ds_point::{DsPoint, DsPointValue}, 
-    ds_status::DsStatus,
+use crate::{
+    ds::{
+        ds_point::{DsPoint, DsPointValue}, 
+        ds_status::DsStatus,
+    }, 
+    tests::setup::setup
 };
 
 #[test]
 fn construct_bool() {
+    setup();
     let value = true;
     let point = DsPoint::newBool(
         "test.point",
@@ -38,6 +41,7 @@ fn construct_bool() {
 }
 #[test]
 fn construct_int() {
+    setup();
     let value = 134_i16;
     let point = DsPoint::newInt(
         "test.point",
@@ -56,6 +60,7 @@ fn construct_int() {
 }
 #[test]
 fn construct_real() {
+    setup();
     let value = 123.567_f32;
     let point = DsPoint::newReal(
         "test.point",
@@ -74,9 +79,7 @@ fn construct_real() {
 }
 #[test]
 fn add_to_queue() {
-    env::set_var("RUST_LOG", "debug");
-    env::set_var("RUST_BACKTRACE", "1");
-    env_logger::init();    
+    setup();
     let count = 100_000usize;
     let queue = ConcurrentQueue::unbounded();
     let mut buf = vec![];

@@ -44,6 +44,7 @@ impl DsDb {
     pub fn new(
         config: DsDbConf,
     ) -> DsDb {
+        const logPref: &str = "[DsDb.new]";
         let _path = config.name.clone();
         let mut dbPoints: BTreeMap<String, ParsePointType> = BTreeMap::new();
         match config.points.clone() {
@@ -86,7 +87,7 @@ impl DsDb {
                             ),
                         );
                     } else {
-
+                        error!("{} point {:?}: uncnoun data type {:?}", logPref, pointKey, dataType);
                     }
                 }
             }

@@ -1,5 +1,5 @@
-// #[macro_use]
-// extern crate snap7_sys;
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
 
 use snap7_sys::*;
 use std::ffi::CString;
