@@ -6,11 +6,19 @@ use crate::ds::{
     ds_status::DsStatus,
 };
 
+
+#[derive(Debug, PartialEq)]
+pub enum DsPointValue {
+    DsPointBool(bool),
+    DsPointInt(i16),
+    DsPointReal(f32),
+}
+
 #[derive(Debug)]
-pub struct DsPoint<T> {
+pub struct DsPoint {
     pub name: String,
     pub dataType: String,
-    pub value: Box<T>,
+    pub value: DsPointValue,
     pub status: DsStatus,
     history: u8,
     alarm: u8,
@@ -18,64 +26,61 @@ pub struct DsPoint<T> {
 }
 
 
-
-impl DsPoint<bool> {
-    pub fn new(
+impl DsPoint {
+    ///
+    /// creates new instance containing value of type bool
+    pub fn newBool(
         name: &str,
         value: bool,
         status: DsStatus,
         history: u8,
         alarm: u8,
         timestamp: DateTime<Utc>,
-    ) -> DsPoint<bool> {
+    ) -> DsPoint {
         DsPoint {
             name: name.to_string(),
             dataType: "Bool".to_string(),
-            value: Box::new(value),
+            value: DsPointValue::DsPointBool(value),
             status: status,
             history: history,
             alarm: alarm,
             timestamp: timestamp,
         }
     }
-}
-
-
-impl DsPoint<i16> {
-    pub fn new(
+    ///
+    /// creates new instance containing value of type i16
+    pub fn newInt(
         name: &str,
         value: i16,
         status: DsStatus,
         history: u8,
         alarm: u8,
         timestamp: DateTime<Utc>,
-    ) -> DsPoint<i16> {
+    ) -> DsPoint {
         DsPoint {
             name: name.to_string(),
-            dataType: "Bool".to_string(),
-            value: Box::new(value),
+            dataType: "Int".to_string(),
+            value: DsPointValue::DsPointInt(value),
             status: status,
             history: history,
             alarm: alarm,
             timestamp: timestamp,
         }
     }
-}
-
-
-impl DsPoint<f32> {
-    pub fn new(
+    ///
+    /// creates new instance containing value of type f32
+    pub fn newReal(
         name: &str,
         value: f32,
         status: DsStatus,
         history: u8,
         alarm: u8,
         timestamp: DateTime<Utc>,
-    ) -> DsPoint<f32> {
+    ) -> DsPoint {
         DsPoint {
             name: name.to_string(),
             dataType: "Real".to_string(),
-            value: Box::new(value),
+            value: DsPointValue::DsPointReal(value),
             status: status,
             history: history,
             alarm: alarm,

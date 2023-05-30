@@ -135,7 +135,7 @@ impl DsDb {
                                         point.addRaw(&bytes);
                                         debug!("{} parsed point Bool: {:#?}", logPref, point);
                                         if point.isChanged() {
-                                            let dsPoint = DsPoint::<bool>::new(
+                                            let dsPoint = DsPoint::newBool(
                                                 point.name.as_str(),
                                                 false,
                                                 DsStatus::Ok,
@@ -151,7 +151,7 @@ impl DsDb {
                                         point.addRaw(&bytes);
                                         debug!("{} parsed point Int: {:#?}", logPref, point);
                                         if point.isChanged() {
-                                            let dsPoint = DsPoint::<i16>::new(
+                                            let dsPoint = DsPoint::newInt(
                                                 point.name.as_str(),
                                                 0,
                                                 DsStatus::Ok,
@@ -167,7 +167,7 @@ impl DsDb {
                                         point.addRaw(&bytes);
                                         // debug!("{} parsed point Real: {:#?}", logPref, point);
                                         if point.isChanged() {
-                                            let dsPoint = DsPoint::<f32>::new(
+                                            let dsPoint = DsPoint::newReal(
                                                 point.name.as_str(),
                                                 0.0,
                                                 DsStatus::Ok,
