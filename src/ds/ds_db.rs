@@ -32,7 +32,7 @@ pub struct DsDb {
     localPoints: HashMap<String, ParsePointType>,
     handle: Option<JoinHandle<()>>,
     cancel: bool,
-    // sender: Arc<ConcurrentQueue<DsPoint>>,
+    sender: Arc<ConcurrentQueue<DsPoint>>,
     // pub receiver: Arc<ConcurrentQueue<DsPoint>>,        
 }
 impl DsDb {
@@ -87,7 +87,7 @@ impl DsDb {
                 }
             }
         }
-        // let sender = Arc::new(ConcurrentQueue::bounded(MAX_QUEUE_SIZE)); 
+        let sender = Arc::new(ConcurrentQueue::bounded(MAX_QUEUE_SIZE)); 
         DsDb {
             name: config.name,
             description: config.description,
@@ -99,7 +99,7 @@ impl DsDb {
             localPoints: dbPoints,
             handle: None,
             cancel: false,
-            // sender: sender.clone(),
+            sender: sender.clone(),
             // receiver: sender,                
         }
 
@@ -117,7 +117,7 @@ impl DsDb {
         let me1 = this.clone();
         let delay = this.clone().lock().unwrap().delay as u64;
         let handle = thread::Builder::new().name("DsDb.thread".to_string()).spawn(move || {
-            // let sender = me.clone().lock().unwrap().sender.clone();
+            let sender = me.clone().lock().unwrap().sender.clone();
             while !me.clone().lock().unwrap().cancel {
                 let me = me.lock().unwrap();
                 let t = Instant::now();
@@ -128,55 +128,55 @@ impl DsDb {
                         Ok(bytes) => {
                             // let bytes = client.read(899, 0, 34).unwrap();
                             // print!("\x1B[2J\x1B[1;1H");
-                            // debug!("{:#?}", bytes);
+                            // debug!("{:?}", bytes);
                             for (_key, pointType) in &me.localPoints {
                                 match pointType.clone() {
                                     ParsePointType::Bool(mut point) => {
                                         point.addRaw(&bytes);
-                                        debug!("{} parsed point Bool: {:#?}", logPref, point);
+                                        // debug!("{} parsed point Bool: {:?}", logPref, point);
                                         if point.isChanged() {
                                             let dsPoint = DsPoint::newBool(
                                                 point.name.as_str(),
                                                 false,
                                                 DsStatus::Ok,
-                                                0,
-                                                0,
                                                 point.timestamp,
+                                                point.h,
+                                                point.a,
                                             );
                                             // sender.push(value)
-                                            debug!("{} point Bool: {:#?}", logPref, point);
+                                            debug!("{} point Bool: {:?}", logPref, dsPoint.value);
                                         }
                                     },
                                     ParsePointType::Int(mut point) => {
                                         point.addRaw(&bytes);
-                                        debug!("{} parsed point Int: {:#?}", logPref, point);
+                                        // debug!("{} parsed point Int: {:?}", logPref, point);
                                         if point.isChanged() {
                                             let dsPoint = DsPoint::newInt(
                                                 point.name.as_str(),
                                                 0,
                                                 DsStatus::Ok,
-                                                0,
-                                                0,
                                                 point.timestamp,
+                                                point.h,
+                                                point.a,
                                             );
                                             // sender.push(value)
-                                            debug!("{} point Int: {:#?}", logPref, point);
+                                            debug!("{} point Int: {:?}", logPref, dsPoint.value);
                                         }
                                     },
                                     ParsePointType::Real(mut point) => {
                                         point.addRaw(&bytes);
-                                        // debug!("{} parsed point Real: {:#?}", logPref, point);
+                                        // debug!("{} parsed point Real: {:?}", logPref, point);
                                         if point.isChanged() {
                                             let dsPoint = DsPoint::newReal(
                                                 point.name.as_str(),
-                                                0.0,
+                                                point.value,
                                                 DsStatus::Ok,
-                                                0,
-                                                0,
                                                 point.timestamp,
+                                                point.h,
+                                                point.a,
                                             );
-                                            debug!("{} point Real: {:#?}", logPref, point);
-                                        // sender.push(value)
+                                            debug!("{} point (Real): {:?} {:?}", logPref, dsPoint.name, dsPoint.value);
+                                            sender.push(dsPoint).unwrap();
                                         }
                                     },
                                 }
@@ -191,13 +191,13 @@ impl DsDb {
 
                 }
                 let dt = Instant::now() - t;
-                // debug!("{} {:#?} elapsed: {:?} ({:?})", logPref, me.name , dt, dt.as_millis());
+                // debug!("{} {:?} elapsed: {:?} ({:?})", logPref, me.name , dt, dt.as_millis());
                 let wait: i128 = (delay as i128) - (dt.as_millis() as i128);
                 if wait > 0 {
                     std::thread::sleep(std::time::Duration::from_millis(wait as u64));
                 }
                 let dt = Instant::now() - t;
-                debug!("{} {:#?} elapsed: {:?} ({:?})", logPref, me.name , dt, dt.as_millis());
+                debug!("{} {:?} elapsed: {:?} ({:?})", logPref, me.name , dt, dt.as_millis());
             }
             info!("{} exit", logPref);
         }).unwrap();

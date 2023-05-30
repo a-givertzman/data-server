@@ -20,9 +20,9 @@ pub struct DsPoint {
     pub dataType: String,
     pub value: DsPointValue,
     pub status: DsStatus,
-    history: u8,
-    alarm: u8,
     pub timestamp: DateTime<Utc>,
+    pub history: Option<u8>,
+    pub alarm: Option<u8>,
 }
 
 
@@ -33,18 +33,18 @@ impl DsPoint {
         name: &str,
         value: bool,
         status: DsStatus,
-        history: u8,
-        alarm: u8,
         timestamp: DateTime<Utc>,
+        history: Option<u8>,
+        alarm: Option<u8>,
     ) -> DsPoint {
         DsPoint {
             name: name.to_string(),
             dataType: "Bool".to_string(),
             value: DsPointValue::DsPointBool(value),
             status: status,
+            timestamp: timestamp,
             history: history,
             alarm: alarm,
-            timestamp: timestamp,
         }
     }
     ///
@@ -53,18 +53,18 @@ impl DsPoint {
         name: &str,
         value: i16,
         status: DsStatus,
-        history: u8,
-        alarm: u8,
         timestamp: DateTime<Utc>,
+        history: Option<u8>,
+        alarm: Option<u8>,
     ) -> DsPoint {
         DsPoint {
             name: name.to_string(),
             dataType: "Int".to_string(),
             value: DsPointValue::DsPointInt(value),
             status: status,
+            timestamp: timestamp,
             history: history,
             alarm: alarm,
-            timestamp: timestamp,
         }
     }
     ///
@@ -73,18 +73,18 @@ impl DsPoint {
         name: &str,
         value: f32,
         status: DsStatus,
-        history: u8,
-        alarm: u8,
         timestamp: DateTime<Utc>,
+        history: Option<u8>,
+        alarm: Option<u8>,
     ) -> DsPoint {
         DsPoint {
             name: name.to_string(),
             dataType: "Real".to_string(),
             value: DsPointValue::DsPointReal(value),
             status: status,
+            timestamp: timestamp,
             history: history,
             alarm: alarm,
-            timestamp: timestamp,
         }
     }
 }

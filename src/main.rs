@@ -17,24 +17,28 @@ use log::{
     debug,
 };
 
+use crate::ds::ds_server::DsServer;
+
 fn main() {
     const logPref: &str = "[main]";
     env::set_var("RUST_LOG", "debug");
     env::set_var("RUST_BACKTRACE", "1");
     env_logger::init();
-    let dir = std::env::current_dir().unwrap();
-    let path: &str = &format!("{}/conf.json", dir.to_str().unwrap());
-    let config = DsConfig::new(path.to_string());
-    let mut lines = HashMap::new();
-    for (lineKey, lineConf) in config.lines {
-        debug!("{} line {:?}: ", logPref, lineKey);
-        let mut line = DsLine::new(lineConf);
-        line.run();
-        lines.insert(
-            lineKey, 
-            line,
-        );
-    }
-    info!("{} all lines started", logPref);
+    // let dir = std::env::current_dir().unwrap();
+    // let path: &str = &format!("{}/conf.json", dir.to_str().unwrap());
+    // let config = DsConfig::new(path.to_string());
+    // let mut lines = HashMap::new();
+    // for (lineKey, lineConf) in config.lines {
+    //     debug!("{} line {:?}: ", logPref, lineKey);
+    //     let mut line = DsLine::new(lineConf);
+    //     line.run();
+    //     lines.insert(
+    //         lineKey, 
+    //         line,
+    //     );
+    // }
+    // info!("{} all lines started", logPref);
+    let mut dsServer = DsServer::new();
+    dsServer.run();
     loop {}
 }

@@ -1,5 +1,5 @@
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum DsStatus {
     Ok = 0,
     Obsolete = 2,

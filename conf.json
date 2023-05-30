@@ -14,13 +14,18 @@
                         "description": "db69",
                         "number": 69,
                         "offset": 0,
-                        "size": 4,
+                        "size": 8,
                         "delay": 10,
                         "points": {
                             "Drive.Speed": {
                                 "dataType": "Real",
                                 "comment": "Drive.Speed",
                                 "offset": 0
+                            },
+                            "Drive.Counter": {
+                                "dataType": "Real",
+                                "comment": "Drive.Counter",
+                                "offset": 4
                             }
                         }
                     }
