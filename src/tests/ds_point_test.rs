@@ -1,3 +1,4 @@
+#![allow(non_upper_case_globals)]
 #[cfg(test)]
 
 use std::env;

@@ -1,8 +1,12 @@
 #![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
 
-use std::{collections::HashMap, thread::{self, JoinHandle}, sync::{Arc, Mutex}, any::Any, time::Instant};
+use std::{
+    collections::{HashMap, BTreeMap}, 
+    thread::{self, JoinHandle}, sync::{Arc, Mutex}, 
+    time::Instant
+};
 
-use chrono::Utc;
 use concurrent_queue::ConcurrentQueue;
 use log::{
     info,
@@ -29,7 +33,7 @@ pub struct DsDb {
     pub size: u32,
     pub delay: u32,
     pub points: Option<HashMap<String, DsPointConf>>,
-    localPoints: HashMap<String, ParsePointType>,
+    localPoints: BTreeMap<String, ParsePointType>,
     handle: Option<JoinHandle<()>>,
     cancel: bool,
     sender: Arc<ConcurrentQueue<DsPoint>>,
@@ -41,7 +45,7 @@ impl DsDb {
         config: DsDbConf,
     ) -> DsDb {
         let _path = config.name.clone();
-        let mut dbPoints: HashMap<String, ParsePointType> = HashMap::new();
+        let mut dbPoints: BTreeMap<String, ParsePointType> = BTreeMap::new();
         match config.points.clone() {
             None => (),
             Some(confPoints) => {

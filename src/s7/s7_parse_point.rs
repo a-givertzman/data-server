@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
 
 use std::array::TryFromSliceError;
 
@@ -265,6 +266,9 @@ impl ParsePoint<f32> for S7ParsePointReal {
     }
     ///
     fn convert(&self, bytes: &Vec<u8>, start: usize, _bit: usize) -> Result<f32, TryFromSliceError> {
+        debug!("[S7ParsePoint<f32>.convert] start: {},  end: {:?}", start, start + 4);
+        let raw: [u8; 4] = (bytes[start..(start + 4)]).try_into().unwrap();
+        debug!("[S7ParsePoint<f32>.convert] raw: {:?}", raw);
         match bytes[start..(start + 4)].try_into() {
             // Ok(v) => Ok(f32::from_le_bytes(v)),
             Ok(v) => Ok(f32::from_be_bytes(v)),

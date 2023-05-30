@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
-#[cfg(test)]
+#![allow(non_upper_case_globals)]
+// #[cfg(test)]
 mod tests;
 
 
@@ -7,14 +8,9 @@ mod s7;
 mod ds;
 use std;
 use std::env;
-use std::collections::HashMap;
-use ds::{
-    ds_config::DsConfig,
-    ds_line::DsLine,
-};
 use log::{
     info,
-    debug,
+    // debug,
 };
 
 use crate::ds::ds_server::DsServer;
@@ -38,6 +34,7 @@ fn main() {
     //     );
     // }
     // info!("{} all lines started", logPref);
+    info!("{} starting application", logPref);
     let mut dsServer = DsServer::new();
     dsServer.run();
     loop {}
