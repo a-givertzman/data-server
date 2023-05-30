@@ -1,7 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![cfg(test)]
 
-use std::env;
 use log::{
     info, 
     debug, 
@@ -17,11 +16,24 @@ use crate::{
         ds_status::DsStatus, 
         ds_config::DsPointConf,
     }, 
-    s7::s7_parse_point::{ParsePointType, S7ParsePointBool, S7ParsePointInt, S7ParsePointReal}, 
+    s7::s7_parse_point::{ParsePointType, S7ParsePointBool, S7ParsePointInt, S7ParsePointReal, ParsePoint}, 
     tests::setup::setup,
 };
 
 const logPref: &str = "[s7_parse_point_test]";
+
+
+pub trait TestValueUnwrap<T> {
+    fn unwrap(self) -> T;
+}
+
+#[derive(Debug, Clone)]
+enum TestValue {
+    Bool(bool),
+    Int(i16),
+    Real(f32),
+}
+
 
 #[test]
 fn construct_bool() {
@@ -87,11 +99,19 @@ fn add_to_queue() {
     info!("{} count: {:?}", logPref, count);
     let mut confPoints: HashMap<String, DsPointConf> = HashMap::new();
     confPoints.insert(
-        "tset1".to_string(),
-        DsPointConf { vrt: None, dataType: Some("Real".to_string()), offset: Some(0), bit: None, h: None, a: None, comment: None },
+        "point1Bool".to_string(),
+        DsPointConf { vrt: None, dataType: Some("Bool".to_string()), offset: Some(0), bit: Some(0), h: None, a: None, comment: None },
     );
     confPoints.insert(
-        "tset1".to_string(),
+        "point2Bool".to_string(),
+        DsPointConf { vrt: None, dataType: Some("Bool".to_string()), offset: Some(0), bit: Some(1), h: None, a: None, comment: None },
+    );
+    confPoints.insert(
+        "point3Int".to_string(),
+        DsPointConf { vrt: None, dataType: Some("Int".to_string()), offset: Some(4), bit: None, h: None, a: None, comment: None },
+    );
+    confPoints.insert(
+        "point4Real".to_string(),
         DsPointConf { vrt: None, dataType: Some("Real".to_string()), offset: Some(4), bit: None, h: None, a: None, comment: None },
     );
     let mut dbPoints: BTreeMap<String, ParsePointType> = BTreeMap::new();
@@ -136,7 +156,55 @@ fn add_to_queue() {
             error!("{} point {:?}: uncnoun data type {:?}", logPref, pointKey, dataType);
         }
     }
-    info!("{} elapsed: {:?}", logPref, dbPoints);
+    // debug!("{} dbPoints: {:?}", logPref, dbPoints);
+    let testData = HashMap::from([
+        ("point1Bool", (vec![0b011u8, 0b001u8], TestValue::Bool(true))), 
+        ("point2Bool", (vec![0b011u8, 0b000u8], TestValue::Bool(false))),
+        ("point3Int", (vec![0u8, 1u8], TestValue::Int(1))),
+        ("point4Real", (vec![68u8, 113u8, 192u8, 179u8], TestValue::Real(967.0109))),
+    ]);
+
+    for (pointKey, parsePoint) in dbPoints {
+        debug!("{} parsePoint: {:?}", logPref, parsePoint);
+        let key = pointKey.clone();
+        let key = key.as_str();
+        let raw = &testData[key];
+        match parsePoint {
+            ParsePointType::Bool(mut point) => {
+                // let raw = vec![0b011u8, 0b001u8];
+                let resultValue = match raw.1 {
+                    TestValue::Bool(value) => value,
+                    TestValue::Int(_) => todo!(),
+                    TestValue::Real(_) => todo!(),
+                };
+                point.addRaw(&raw.0);
+                debug!("{} raw: {:?},  parsed value: {:?}", logPref, raw.1, point.value);
+                assert_eq!(point.value, resultValue);
+            },
+            ParsePointType::Int(mut point) => {
+                // let raw = vec![0u8, 1u8];
+                let resultValue = match raw.1 {
+                    TestValue::Bool(_) => todo!(),
+                    TestValue::Int(value) => value,
+                    TestValue::Real(_) => todo!(),
+                };
+                point.addRaw(&raw.0);
+                debug!("{} raw: {:?},  parsed value: {:?}", logPref, raw.1, point.value);
+                assert_eq!(point.value, resultValue);
+            },
+            ParsePointType::Real(mut point) => {
+                // let raw = vec![68u8, 113u8, 192u8, 179u8];
+                let resultValue = match raw.1 {
+                    TestValue::Bool(_) => todo!(),
+                    TestValue::Int(_) => todo!(),
+                    TestValue::Real(value) => value,
+                };
+                point.addRaw(&raw.0);
+                debug!("{} raw: {:?},  parsed value: {:?}", logPref, raw.1, point.value);
+                assert_eq!(point.value, resultValue);
+            },
+        }
+    } 
     // assert_eq!(buf.len(), queue.len(), "length of source values array must be equal to the length of target queue");
     // for value in buf {
     //     let point = queue.pop().unwrap();
