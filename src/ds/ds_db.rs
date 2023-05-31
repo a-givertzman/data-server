@@ -180,7 +180,7 @@ impl DsDb {
                                                 point.h,
                                                 point.a,
                                             );
-                                            debug!("{} point (Real): {:?} {:?}", logPref, dsPoint.name, dsPoint.value);
+                                            // debug!("{} point (Real): {:?} {:?}", logPref, dsPoint.name, dsPoint.value);
                                             sender.push(dsPoint).unwrap();
                                         }
                                     },

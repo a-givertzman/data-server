@@ -7,7 +7,7 @@ use std;
 use std::env;
 use log::{
     info,
-    // debug,
+    debug,
 };
 
 use crate::ds::ds_server::DsServer;
@@ -34,5 +34,12 @@ fn main() {
     info!("{} starting application", logPref);
     let mut dsServer = DsServer::new();
     dsServer.run();
-    loop {}
+    loop {
+        for queue in &dsServer.queues {
+            while !queue.is_empty() {
+                let point = queue.pop().unwrap();
+                debug!("{} point ({:?}): {:?} {:?}", logPref, point.dataType, point.name, point.value);
+            }
+        }
+    }
 }
