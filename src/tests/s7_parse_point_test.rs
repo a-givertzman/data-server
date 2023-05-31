@@ -12,7 +12,7 @@ use chrono::{Utc};
 
 use crate::{
     ds::{
-        ds_point::{DsPoint, DsPointValue}, 
+        ds_point::{DsPoint, DsPointType}, 
         ds_status::DsStatus, 
         ds_config::DsPointConf,
     }, 
@@ -21,18 +21,6 @@ use crate::{
 };
 
 const logPref: &str = "[s7_parse_point_test]";
-
-
-pub trait TestValueUnwrap<T> {
-    fn unwrap(self) -> T;
-}
-
-#[derive(Debug, Clone)]
-enum TestValue {
-    Bool(bool),
-    Int(i16),
-    Real(f32),
-}
 
 
 #[test]
@@ -48,9 +36,9 @@ fn construct_bool() {
         None,
     );
     let pValue = match point.value {
-        DsPointValue::DsPointBool(value) => value,
-        DsPointValue::DsPointInt(_) => todo!(),
-        DsPointValue::DsPointReal(_) => todo!(),
+        DsPointType::Bool(value) => value,
+        DsPointType::Int(_) => todo!(),
+        DsPointType::Real(_) => todo!(),
     };
     assert_eq!(pValue, value);
 }
@@ -67,9 +55,9 @@ fn construct_int() {
         None,
     );
     let pValue = match point.value {
-        DsPointValue::DsPointBool(_) => todo!(),
-        DsPointValue::DsPointInt(value) => value,
-        DsPointValue::DsPointReal(_) => todo!(),
+        DsPointType::Bool(_) => todo!(),
+        DsPointType::Int(value) => value,
+        DsPointType::Real(_) => todo!(),
     };    
     assert_eq!(pValue, value);
 }
@@ -86,17 +74,15 @@ fn construct_real() {
         None,
     );
     let pValue = match point.value {
-        DsPointValue::DsPointBool(_) => todo!(),
-        DsPointValue::DsPointInt(_) => todo!(),
-        DsPointValue::DsPointReal(value) => value,
+        DsPointType::Bool(_) => todo!(),
+        DsPointType::Int(_) => todo!(),
+        DsPointType::Real(value) => value,
     };    
     assert_eq!(pValue, value);
 }
 #[test]
 fn add_to_queue() {
     setup();
-    let count = 100_000usize;
-    info!("{} count: {:?}", logPref, count);
     let mut confPoints: HashMap<String, DsPointConf> = HashMap::new();
     confPoints.insert(
         "point1Bool".to_string(),
@@ -107,12 +93,12 @@ fn add_to_queue() {
         DsPointConf { vrt: None, dataType: Some("Bool".to_string()), offset: Some(0), bit: Some(1), h: None, a: None, comment: None },
     );
     confPoints.insert(
-        "point3Int".to_string(),
-        DsPointConf { vrt: None, dataType: Some("Int".to_string()), offset: Some(4), bit: None, h: None, a: None, comment: None },
+        "pointInt".to_string(),
+        DsPointConf { vrt: None, dataType: Some("Int".to_string()), offset: Some(0), bit: None, h: None, a: None, comment: None },
     );
     confPoints.insert(
-        "point4Real".to_string(),
-        DsPointConf { vrt: None, dataType: Some("Real".to_string()), offset: Some(4), bit: None, h: None, a: None, comment: None },
+        "pointReal".to_string(),
+        DsPointConf { vrt: None, dataType: Some("Real".to_string()), offset: Some(0), bit: None, h: None, a: None, comment: None },
     );
     let mut dbPoints: BTreeMap<String, ParsePointType> = BTreeMap::new();
     let t = Instant::now();
@@ -157,59 +143,56 @@ fn add_to_queue() {
         }
     }
     // debug!("{} dbPoints: {:?}", logPref, dbPoints);
-    let testData = HashMap::from([
-        ("point1Bool", (vec![0b011u8, 0b001u8], TestValue::Bool(true))), 
-        ("point2Bool", (vec![0b011u8, 0b000u8], TestValue::Bool(false))),
-        ("point3Int", (vec![0u8, 1u8], TestValue::Int(1))),
-        ("point4Real", (vec![68u8, 113u8, 192u8, 179u8], TestValue::Real(967.0109))),
-    ]);
+    let testData = vec![
+        ("point1Bool", (vec![0b0u8, 0b001u8], DsPointType::Bool(true))), 
+        ("point1Bool", (vec![0b0u8, 0b000u8], DsPointType::Bool(false))),
+        ("point1Bool", (vec![0b1u8, 0b111u8], DsPointType::Bool(true))), 
+        ("point1Bool", (vec![0b1u8, 0b110u8], DsPointType::Bool(false))),
+        ("point2Bool", (vec![0b0u8, 0b010u8], DsPointType::Bool(true))), 
+        ("point2Bool", (vec![0b0u8, 0b000u8], DsPointType::Bool(false))),
+        ("point2Bool", (vec![0b1u8, 0b111u8], DsPointType::Bool(true))), 
+        ("point2Bool", (vec![0b1u8, 0b101u8], DsPointType::Bool(false))),
+        ("pointInt", (vec![0u8, 0u8], DsPointType::Int(0))),
+        ("pointInt", (vec![0u8, 1u8], DsPointType::Int(1))),
+        ("pointInt", (vec![0u8, 2u8], DsPointType::Int(2))),
+        ("pointInt", (vec![0u8, 3u8], DsPointType::Int(3))),
+        ("pointInt", (vec![0x04u8, 0xD2u8], DsPointType::Int(1234))),
+        ("pointInt", (vec![0x80u8, 0x00u8], DsPointType::Int(-32768))),
+        ("pointInt", (vec![0x7Fu8, 0xFFu8], DsPointType::Int(32767))),
+        ("pointReal", (vec![68u8, 113u8, 192u8, 179u8], DsPointType::Real(967.0109))),
+        ("pointReal", (vec![0x44u8, 0x71u8, 0xC0u8, 0xB3u8], DsPointType::Real(967.0109))),
+        ("pointReal", (vec![0x46u8, 0x40u8, 0xE4u8, 0x7Eu8], DsPointType::Real(12345.12345))),
+        ("pointReal", (vec![0x3Du8, 0xFCu8, 0xD3u8, 0x5Bu8], DsPointType::Real(0.12345))),
+        ("pointReal", (vec![0x46u8, 0x40u8, 0xE4u8, 0x00u8], DsPointType::Real(12345.0))),
+    ];
 
-    for (pointKey, parsePoint) in dbPoints {
-        debug!("{} parsePoint: {:?}", logPref, parsePoint);
-        let key = pointKey.clone();
-        let key = key.as_str();
-        let raw = &testData[key];
+    for (key, (bytes, result)) in testData {
+        debug!("{} test on key: {:?},  bytes: {:?},  result: {:?}", logPref, key, bytes, result);
+        // let key = *pointKey.clone();
+        // let key = key.as_str();
+        let parsePoint = dbPoints[key].clone();
         match parsePoint {
             ParsePointType::Bool(mut point) => {
-                // let raw = vec![0b011u8, 0b001u8];
-                let resultValue = match raw.1 {
-                    TestValue::Bool(value) => value,
-                    TestValue::Int(_) => todo!(),
-                    TestValue::Real(_) => todo!(),
-                };
-                point.addRaw(&raw.0);
-                debug!("{} raw: {:?},  parsed value: {:?}", logPref, raw.1, point.value);
+                let resultValue = result.valueBool();
+                point.addRaw(&bytes);
+                debug!("{} raw: {:?},  parsed value: {:?}", logPref, result, point.value);
                 assert_eq!(point.value, resultValue);
             },
             ParsePointType::Int(mut point) => {
-                // let raw = vec![0u8, 1u8];
-                let resultValue = match raw.1 {
-                    TestValue::Bool(_) => todo!(),
-                    TestValue::Int(value) => value,
-                    TestValue::Real(_) => todo!(),
-                };
-                point.addRaw(&raw.0);
-                debug!("{} raw: {:?},  parsed value: {:?}", logPref, raw.1, point.value);
+                let resultValue = result.valueInt();
+                point.addRaw(&bytes);
+                debug!("{} raw: {:?},  parsed value: {:?}", logPref, result, point.value);
                 assert_eq!(point.value, resultValue);
             },
             ParsePointType::Real(mut point) => {
-                // let raw = vec![68u8, 113u8, 192u8, 179u8];
-                let resultValue = match raw.1 {
-                    TestValue::Bool(_) => todo!(),
-                    TestValue::Int(_) => todo!(),
-                    TestValue::Real(value) => value,
-                };
-                point.addRaw(&raw.0);
-                debug!("{} raw: {:?},  parsed value: {:?}", logPref, raw.1, point.value);
+                let resultValue = result.valueReal();
+                point.addRaw(&bytes);
+                debug!("{} raw: {:?},  parsed value: {:?}", logPref, result, point.value);
                 assert_eq!(point.value, resultValue);
             },
         }
     } 
-    // assert_eq!(buf.len(), queue.len(), "length of source values array must be equal to the length of target queue");
-    // for value in buf {
-    //     let point = queue.pop().unwrap();
-    //     assert_eq!(point.value, value);
-    // }
+
     let elapsed = Instant::now() - t;
     info!("{} elapsed: {:?}", logPref, elapsed);
 }

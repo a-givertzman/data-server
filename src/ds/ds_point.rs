@@ -8,18 +8,47 @@ use crate::ds::{
 };
 
 
-#[derive(Debug, PartialEq)]
-pub enum DsPointValue {
-    DsPointBool(bool),
-    DsPointInt(i16),
-    DsPointReal(f32),
+#[derive(Debug, Clone, PartialEq)]
+pub enum DsPointType {
+    Bool(bool),
+    Int(i16),
+    Real(f32),
+}
+impl DsPointType {
+    ///
+    /// 
+    pub fn valueBool(&self) -> bool{
+        match *self {
+            DsPointType::Bool(value) => value,
+            DsPointType::Int(_) => todo!(),
+            DsPointType::Real(_) => todo!(),
+        }      
+    }
+    ///
+    /// 
+    pub fn valueInt(&self) -> i16{
+        match *self {
+            DsPointType::Int(value) => value,
+            DsPointType::Bool(_) => todo!(),
+            DsPointType::Real(_) => todo!(),
+        }      
+    }
+    ///
+    /// 
+    pub fn valueReal(&self) -> f32{
+        match *self {
+            DsPointType::Real(value) => value,
+            DsPointType::Int(_) => todo!(),
+            DsPointType::Bool(_) => todo!(),
+        }      
+    }
 }
 
 #[derive(Debug)]
 pub struct DsPoint {
     pub name: String,
     pub dataType: String,
-    pub value: DsPointValue,
+    pub value: DsPointType,
     pub status: DsStatus,
     pub timestamp: DateTime<Utc>,
     pub history: Option<u8>,
@@ -41,7 +70,7 @@ impl DsPoint {
         DsPoint {
             name: name.to_string(),
             dataType: "Bool".to_string(),
-            value: DsPointValue::DsPointBool(value),
+            value: DsPointType::Bool(value),
             status: status,
             timestamp: timestamp,
             history: history,
@@ -61,7 +90,7 @@ impl DsPoint {
         DsPoint {
             name: name.to_string(),
             dataType: "Int".to_string(),
-            value: DsPointValue::DsPointInt(value),
+            value: DsPointType::Int(value),
             status: status,
             timestamp: timestamp,
             history: history,
@@ -81,11 +110,38 @@ impl DsPoint {
         DsPoint {
             name: name.to_string(),
             dataType: "Real".to_string(),
-            value: DsPointValue::DsPointReal(value),
+            value: DsPointType::Real(value),
             status: status,
             timestamp: timestamp,
             history: history,
             alarm: alarm,
         }
+    }
+    ///
+    /// 
+    pub fn valueBool(&self) -> bool{
+        match self.value {
+            DsPointType::Bool(value) => value,
+            DsPointType::Int(_) => todo!(),
+            DsPointType::Real(_) => todo!(),
+        }      
+    }
+    ///
+    /// 
+    pub fn valueInt(&self) -> i16{
+        match self.value {
+            DsPointType::Int(value) => value,
+            DsPointType::Bool(_) => todo!(),
+            DsPointType::Real(_) => todo!(),
+        }      
+    }
+    ///
+    /// 
+    pub fn valueReal(&self) -> f32{
+        match self.value {
+            DsPointType::Real(value) => value,
+            DsPointType::Int(_) => todo!(),
+            DsPointType::Bool(_) => todo!(),
+        }      
     }
 }

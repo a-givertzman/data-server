@@ -14,7 +14,7 @@ use rand::Rng;
 
 use crate::{
     ds::{
-        ds_point::{DsPoint, DsPointValue}, 
+        ds_point::{DsPoint, DsPointType}, 
         ds_status::DsStatus,
     }, 
     tests::setup::setup
@@ -33,9 +33,9 @@ fn construct_bool() {
         None,
     );
     let pValue = match point.value {
-        DsPointValue::DsPointBool(value) => value,
-        DsPointValue::DsPointInt(_) => todo!(),
-        DsPointValue::DsPointReal(_) => todo!(),
+        DsPointType::Bool(value) => value,
+        DsPointType::Int(_) => todo!(),
+        DsPointType::Real(_) => todo!(),
     };
     assert_eq!(pValue, value);
 }
@@ -52,9 +52,9 @@ fn construct_int() {
         None,
     );
     let pValue = match point.value {
-        DsPointValue::DsPointBool(_) => todo!(),
-        DsPointValue::DsPointInt(value) => value,
-        DsPointValue::DsPointReal(_) => todo!(),
+        DsPointType::Bool(_) => todo!(),
+        DsPointType::Int(value) => value,
+        DsPointType::Real(_) => todo!(),
     };    
     assert_eq!(pValue, value);
 }
@@ -71,9 +71,9 @@ fn construct_real() {
         None,
     );
     let pValue = match point.value {
-        DsPointValue::DsPointBool(_) => todo!(),
-        DsPointValue::DsPointInt(_) => todo!(),
-        DsPointValue::DsPointReal(value) => value,
+        DsPointType::Bool(_) => todo!(),
+        DsPointType::Int(_) => todo!(),
+        DsPointType::Real(value) => value,
     };    
     assert_eq!(pValue, value);
 }
@@ -91,19 +91,19 @@ fn add_to_queue() {
                 let mut rng = rand::thread_rng();
                 let value = rng.gen_bool(0.5);
                 // debug!("[ds_point_test.add_to_queue] bool value: {:?}", &value);
-                DsPointValue::DsPointBool(value)
+                DsPointType::Bool(value)
             }
             1 => {
                 let mut rng = rand::thread_rng();
                 let value = rng.gen_range(-32_768i16..32_767i16);
                 // debug!("[ds_point_test.add_to_queue] int  value: {:?}", &value);
-                DsPointValue::DsPointInt(value)
+                DsPointType::Int(value)
             }
             _ => {
                 let mut rng = rand::thread_rng();
                 let value = rng.gen_range((-1.0e5)..(1.0e5));
                 // debug!("[ds_point_test.add_to_queue] real  value: {:?}", &value);
-                DsPointValue::DsPointReal(value)
+                DsPointType::Real(value)
             }
         };
         // debug!("[ds_point_test.add_to_queue] point value: {:?}", &value);
@@ -113,7 +113,7 @@ fn add_to_queue() {
     let t = Instant::now();
     for value in &buf {
         let point = match value {
-            DsPointValue::DsPointBool(value) => {
+            DsPointType::Bool(value) => {
                 DsPoint::newBool(
                     "test.point.bool",
                     *value,
@@ -123,7 +123,7 @@ fn add_to_queue() {
                     None,
                 )
             }
-            DsPointValue::DsPointInt(value) => {
+            DsPointType::Int(value) => {
                 DsPoint::newInt(
                     "test.point.int",
                     *value,
@@ -133,7 +133,7 @@ fn add_to_queue() {
                     None,
                 )
             }
-            DsPointValue::DsPointReal(value) => {
+            DsPointType::Real(value) => {
                 DsPoint::newReal(
                     "test.point.real",
                     *value,
