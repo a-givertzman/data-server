@@ -37,7 +37,7 @@ pub struct DsDb {
     handle: Option<JoinHandle<()>>,
     cancel: bool,
     sender: Arc<ConcurrentQueue<DsPoint>>,
-    // pub receiver: Arc<ConcurrentQueue<DsPoint>>,        
+    pub receiver: Arc<ConcurrentQueue<DsPoint>>,
 }
 impl DsDb {
     ///
@@ -105,7 +105,7 @@ impl DsDb {
             handle: None,
             cancel: false,
             sender: sender.clone(),
-            // receiver: sender,                
+            receiver: sender,
         }
 
     }
